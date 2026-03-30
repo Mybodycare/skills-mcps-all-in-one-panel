@@ -5,7 +5,11 @@
 
 Panel todo-en-uno para Claude Code. Explora, audita y gestiona skills y servidores MCP desde el navegador. Scanner de seguridad con 37 checks basados en CVEs reales (malware, exfiltration, prompt injection). Instala MCPs con un click: pega tu token y listo. Detecta automticamente todo lo instalado. Mac y Windows.
 
-```
+```bash
+# Option 1 — directly from GitHub (no npm account needed)
+npx github:Mybodycare/skills-mcps-all-in-one-panel
+
+# Option 2 — if published to npm
 npx skill-panel
 ```
 
