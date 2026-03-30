@@ -696,8 +696,18 @@ async function searchDrawer(q){
   }
 }
 
-// ── MCP INFO DRAWER ──────────────────────────────────────────────────
-function openMcpInfo(info, name, evt){
+// ── MCP INFO DRAWER (with auto-install) ─────────────────────────────
+let _mcpCatalog = null;
+async function loadMcpCatalog(){
+  if(_mcpCatalog) return _mcpCatalog;
+  try{
+    const r = await fetch((ON_SERVER?'':SRV)+'/mcp-catalog');
+    if(r.ok) _mcpCatalog = await r.json();
+  }catch(e){}
+  return _mcpCatalog || [];
+}
+
+async function openMcpInfo(info, name, evt){
   if(evt) evt.stopPropagation();
   const d = document.getElementById('mcpDrawer');
   const o = document.getElementById('mcpOverlay');
@@ -705,46 +715,151 @@ function openMcpInfo(info, name, evt){
     alert('Información de instalación no disponible para este MCP.');
     return;
   }
+
+  // Try to find this MCP in the server catalog (has credential info)
+  const catalog = await loadMcpCatalog();
+  const catalogEntry = catalog.find(m =>
+    info.pkg && (info.pkg.includes(m.npm) || m.name.toLowerCase() === name.toLowerCase())
+  );
+
+  const creds = catalogEntry?.credentials || [];
+  const hasCreds = creds.length > 0;
+  const mcpId = catalogEntry?.id || name.toLowerCase().replace(/\s+/g,'-');
+
   document.getElementById('mcpDrawerTitle').textContent = `Instalar MCP: ${name}`;
+
+  // Build credential input fields
+  let credFields = '';
+  if(hasCreds){
+    credFields = creds.map((cred, i) => `
+      <div style="margin-bottom:10px">
+        <div class="inst-lbl" style="margin-bottom:6px">
+          <span style="background:var(--cyan);color:var(--bg);font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-right:6px">PASO 1</span>
+          Obtén tu ${cred.label}
+        </div>
+        ${cred.url ? `<a href="${cred.url}" target="_blank"><button class="btn btn-ghost" style="width:100%;margin-bottom:8px">🔑 Obtener ${cred.label} →</button></a>` : ''}
+        ${cred.help ? `<div style="font-size:10px;color:var(--muted);margin-bottom:8px">${cred.help}</div>` : ''}
+      </div>
+      <div style="margin-bottom:14px">
+        <div class="inst-lbl" style="margin-bottom:6px">
+          <span style="background:var(--green);color:var(--bg);font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-right:6px">PASO 2</span>
+          Pega tu ${cred.label} aquí
+        </div>
+        <input type="text" id="mcpCred${i}" class="sbox"
+               placeholder="${cred.placeholder || 'Pega tu token/key aquí...'}"
+               style="width:100%;font-family:monospace;font-size:12px;padding:10px;margin-bottom:4px"
+               autocomplete="off" spellcheck="false" />
+        <div style="font-size:9px;color:var(--muted)">Se guardará en ~/.claude.json como variable de entorno. Nunca se comparte.</div>
+      </div>
+    `).join('');
+  } else {
+    credFields = `
+      <div class="box-safe" style="margin-bottom:14px">
+        ✅ Este MCP no requiere credenciales. Instalación directa.
+      </div>`;
+  }
+
   document.getElementById('mcpDrawerBody').innerHTML = `
-    <div class="box-warn" style="margin-bottom:14px">
-      ⚠️ Los MCPs <strong>no se instalan como skills</strong>. Se configuran en Claude Code editando
-      <code style="background:var(--s3);padding:1px 5px;border-radius:3px">~/.claude/settings.json</code>
+    <div class="info-grid" style="margin-bottom:14px">
+      <div class="info-chip"><div class="lbl">Paquete npm</div><div class="val" style="font-size:11px">${info.pkg}</div></div>
+      <div class="info-chip"><div class="lbl">Credencial</div><div class="val" style="font-size:11px">${hasCreds ? creds[0].label : 'Ninguna'}</div></div>
     </div>
 
-    <div class="info-grid" style="margin-bottom:12px">
-      <div class="info-chip"><div class="lbl">Paquete npm</div><div class="val" style="font-size:11px">${info.pkg}</div></div>
-      <div class="info-chip"><div class="lbl">Credencial requerida</div><div class="val" style="font-size:11px">${info.keyLabel||'API Key'}</div></div>
-    </div>
+    ${credFields}
 
     <div style="margin-bottom:10px">
-      <div class="inst-lbl" style="margin-bottom:6px">1. Obtén tu API key</div>
-      <a href="${info.keyUrl||'#'}" target="_blank">
-        <button class="btn btn-ghost" style="width:100%">🔑 Obtener ${info.keyLabel||'API Key'} →</button>
+      <div class="inst-lbl" style="margin-bottom:6px">
+        <span style="background:var(--yellow);color:var(--bg);font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-right:6px">${hasCreds?'PASO 3':'INSTALAR'}</span>
+        Instalar automáticamente
+      </div>
+      <button id="mcpInstallBtn" class="btn btn-primary" style="width:100%;padding:12px;font-size:13px;font-weight:600"
+              onclick="doInstallMcp('${mcpId}','${name}')">
+        ⬇️ Instalar ${name} en Claude Code
+      </button>
+      <div id="mcpInstallResult" style="margin-top:8px"></div>
+    </div>
+
+    <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:10px">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px">Después de instalar, reinicia Claude Code. Verifica con <code style="background:var(--s3);padding:1px 4px;border-radius:3px">/mcp</code></div>
+      <a href="${info.docs||'https://modelcontextprotocol.io'}" target="_blank">
+        <button class="btn btn-ghost" style="width:100%;font-size:11px">📖 Documentación oficial →</button>
       </a>
     </div>
-
-    <div style="margin-bottom:10px">
-      <div class="inst-lbl" style="margin-bottom:6px">2. Añade esto a ~/.claude/settings.json → "mcpServers"</div>
-      <div style="background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:10px;font-family:monospace;font-size:11px;color:var(--cyan);white-space:pre;overflow-x:auto;line-height:1.6">${(info.config||'').replace(/</g,'&lt;')}</div>
-      <button class="btn btn-ghost" style="margin-top:6px;width:100%" onclick="navigator.clipboard.writeText(${JSON.stringify(info.config||'').replace(/'/g,"\\'")});this.textContent='✓ Copiado'">📋 Copiar config JSON</button>
-    </div>
-
-    <div style="margin-bottom:10px">
-      <div class="inst-lbl" style="margin-bottom:6px">3. Reinicia Claude Code</div>
-      <div style="font-size:11px;color:var(--muted);line-height:1.6">
-        Después de editar settings.json, cierra y vuelve a abrir Claude Code para que el MCP se active.<br>
-        Verifica con: <code style="background:var(--s3);padding:1px 4px;border-radius:3px">/mcp</code> en el terminal de Claude Code.
-      </div>
-    </div>
-
-    <a href="${info.docs||'https://modelcontextprotocol.io'}" target="_blank">
-      <button class="btn btn-ghost" style="width:100%">📖 Documentación oficial →</button>
-    </a>
   `;
   o.classList.add('open');
   d.classList.add('open');
 }
+
+async function doInstallMcp(mcpId, displayName){
+  const btn = document.getElementById('mcpInstallBtn');
+  const result = document.getElementById('mcpInstallResult');
+  btn.disabled = true;
+  btn.textContent = '⏳ Instalando...';
+  result.innerHTML = '';
+
+  // Get catalog entry
+  const catalog = await loadMcpCatalog();
+  const entry = catalog.find(m => m.id === mcpId);
+
+  if(!entry){
+    // Fallback: try generic install
+    result.innerHTML = `<div class="box-warn">⚠️ MCP no encontrado en el catálogo. Copia la config JSON manualmente.</div>`;
+    btn.disabled = false;
+    btn.textContent = `⬇️ Instalar ${displayName} en Claude Code`;
+    return;
+  }
+
+  // Collect credentials from input fields
+  const envVars = {};
+  if(entry.credentials){
+    for(let i = 0; i < entry.credentials.length; i++){
+      const input = document.getElementById(`mcpCred${i}`);
+      const val = input?.value?.trim() || '';
+      if(entry.credentials[i].key && !val && entry.credentials.length > 0){
+        result.innerHTML = `<div class="box-warn">⚠️ Pega tu ${entry.credentials[i].label} en el campo de arriba antes de instalar.</div>`;
+        btn.disabled = false;
+        btn.textContent = `⬇️ Instalar ${displayName} en Claude Code`;
+        input?.focus();
+        return;
+      }
+      if(val) envVars[entry.credentials[i].key] = val;
+    }
+  }
+
+  try{
+    const r = await fetch((ON_SERVER?'':SRV)+'/install-mcp', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        name: entry.id,
+        command: entry.command,
+        args: entry.args,
+        envVars
+      })
+    });
+    const data = await r.json();
+    if(data.success){
+      btn.textContent = '✅ Instalado';
+      btn.style.background = 'rgba(34,197,94,.3)';
+      btn.style.color = 'var(--green)';
+      result.innerHTML = `
+        <div class="box-safe">
+          ✅ <strong>${displayName}</strong> instalado correctamente.<br>
+          <span style="font-size:11px">Config guardada en <code>${data.configPath||'~/.claude.json'}</code>.<br>
+          Reinicia Claude Code para activarlo.</span>
+        </div>`;
+    } else {
+      btn.disabled = false;
+      btn.textContent = `⬇️ Instalar ${displayName} en Claude Code`;
+      result.innerHTML = `<div class="box-fail">❌ ${data.error||'Error desconocido'}</div>`;
+    }
+  }catch(e){
+    btn.disabled = false;
+    btn.textContent = `⬇️ Instalar ${displayName} en Claude Code`;
+    result.innerHTML = `<div class="box-fail">❌ Error de conexión. ¿Está el servidor arrancado?</div>`;
+  }
+}
+
 function closeMcpDrawer(){
   document.getElementById('mcpDrawer').classList.remove('open');
   document.getElementById('mcpOverlay').classList.remove('open');
