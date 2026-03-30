@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skill Hub</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0c11;--s1:#14141d;--s2:#1c1c28;--s3:#232334;--border:#282840;
+  --accent:#6c63ff;--green:#22c55e;--yellow:#f59e0b;--red:#ef4444;
+  --blue:#3b82f6;--pink:#ec4899;--cyan:#00d4aa;
+  --text:#e8e8f0;--muted:#66668a;--r:10px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* TOPBAR */
+.topbar{background:var(--s1);border-bottom:1px solid var(--border);padding:0 24px;height:54px;display:flex;align-items:center;gap:14px;flex-shrink:0;z-index:50}
+.logo{width:30px;height:30px;background:linear-gradient(135deg,var(--accent),var(--cyan));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:600}
+.topbar-sub{font-size:11px;color:var(--muted)}
+.spacer{flex:1}
+.stat{font-size:11px;color:var(--muted);margin-left:16px}
+.stat b{color:var(--cyan);font-weight:600}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:200px;background:var(--s1);border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;padding:12px 0}
+.sb-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:0 14px;margin:14px 0 5px}
+.sb-item{display:flex;align-items:center;gap:8px;padding:6px 14px;cursor:pointer;font-size:12px;color:var(--muted);border-left:2px solid transparent;transition:all .12s}
+.sb-item:hover{background:var(--s2);color:var(--text)}
+.sb-item.active{background:var(--s2);color:var(--text);border-left-color:var(--accent)}
+.sb-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sb-n{margin-left:auto;background:var(--s3);font-size:10px;padding:1px 5px;border-radius:6px;color:var(--muted)}
+.sb-div{height:1px;background:var(--border);margin:8px 14px}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* SEARCH ZONE */
+.search-zone{padding:16px 20px 12px;background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0}
+.row{display:flex;gap:8px;margin-bottom:8px}
+.sbox{flex:1;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;color:var(--text);font-size:13px;outline:none;transition:border-color .2s}
+.sbox:focus{border-color:var(--accent)}
+.sbox::placeholder{color:var(--muted)}
+.ai-bar{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;display:flex;gap:8px;align-items:flex-start}
+.ai-icon{width:26px;height:26px;background:linear-gradient(135deg,var(--accent),var(--cyan));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:1px}
+.ai-bar textarea{flex:1;background:transparent;border:none;color:var(--text);font-size:12px;resize:none;outline:none;font-family:inherit;min-height:32px;max-height:60px;line-height:1.5}
+.ai-bar textarea::placeholder{color:var(--muted)}
+.btn-row{display:flex;gap:6px;align-self:flex-end}
+
+/* BUTTONS */
+.btn{border:none;border-radius:7px;padding:7px 12px;font-size:11px;font-weight:500;cursor:pointer;transition:all .12s;white-space:nowrap}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-online{background:rgba(249,115,22,.85);color:#fff}
+.btn-ghost{background:var(--s2);color:var(--text);border:1px solid var(--border)}
+.btn-install{background:rgba(108,99,255,.12);color:var(--accent);border:1px solid rgba(108,99,255,.25);font-size:10px;padding:4px 9px;border-radius:5px}
+.btn-install:hover{background:rgba(108,99,255,.22)}
+.btn-green{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25);font-size:10px;padding:4px 9px;border-radius:5px}
+
+/* AI RESPONSE */
+.ai-resp{background:var(--s1);border:1px solid rgba(108,99,255,.35);border-radius:var(--r);padding:10px 12px;font-size:12px;line-height:1.6;margin-top:8px;display:none;animation:fadeUp .2s ease}
+.ai-resp.show{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:16px 20px}
+.sec-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sec-title{font-size:12px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px}
+.sec-count{background:var(--s1);border:1px solid var(--border);padding:2px 7px;border-radius:7px;font-size:10px}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:10px;margin-bottom:20px}
+
+/* CARD */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:13px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .15s}
+.card:hover{border-color:rgba(108,99,255,.3);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.card:hover::before{opacity:1;background:var(--accent)}
+.card.installed{border-color:rgba(0,212,170,.2)}
+.card.installed::before{background:var(--cyan);opacity:1}
+.card.mcp{border-color:rgba(236,72,153,.15)}
+.card.mcp::before{background:var(--pink);opacity:1}
+.card.highlight{border-color:var(--accent)!important;background:rgba(108,99,255,.06)}
+.card.highlight::before{background:var(--accent);opacity:1}
+
+.card-top{display:flex;align-items:flex-start;gap:9px}
+.card-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.card-name{font-size:12px;font-weight:600;line-height:1.3}
+.card-cat{font-size:10px;color:var(--muted);margin-top:1px}
+.card-desc{font-size:11px;color:var(--muted);line-height:1.5;flex:1}
+
+.envs{display:flex;gap:4px;flex-wrap:wrap}
+.env{font-size:9px;font-weight:500;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.e-terminal{background:rgba(34,197,94,.1);color:#22c55e}
+.e-cowork{background:rgba(245,158,11,.1);color:#f59e0b}
+.e-chat{background:rgba(59,130,246,.1);color:#3b82f6}
+.e-vscode{background:rgba(139,92,246,.1);color:#8b5cf6}
+.e-mcp{background:rgba(236,72,153,.1);color:#ec4899}
+
+.card-foot{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.tag-inst{font-size:9px;background:rgba(0,212,170,.1);color:var(--cyan);padding:2px 7px;border-radius:4px;font-weight:500}
+.tag-mcp{font-size:9px;background:rgba(236,72,153,.1);color:var(--pink);padding:2px 7px;border-radius:4px;font-weight:500}
+
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-state p{font-size:13px;margin-top:6px}
+
+/* ═══════════════════════════════════════════
+   ANALYZER DRAWER (slides up from bottom)
+═══════════════════════════════════════════ */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;opacity:0;pointer-events:none;transition:opacity .25s}
+.drawer-overlay.open{opacity:1;pointer-events:all}
+.drawer{position:fixed;bottom:0;left:0;right:0;background:var(--s1);border-top:1px solid var(--border);border-radius:16px 16px 0 0;z-index:101;max-height:88vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,1,.23,1)}
+.drawer.open{transform:translateY(0)}
+
+.drawer-hdr{padding:16px 24px 0;display:flex;align-items:center;gap:10px;position:sticky;top:0;background:var(--s1);border-bottom:1px solid var(--border);padding-bottom:14px}
+.drawer-hdr h2{font-size:14px;font-weight:600;flex:1}
+.drawer-close{width:28px;height:28px;background:var(--s2);border:1px solid var(--border);border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--muted);transition:all .12s}
+.drawer-close:hover{color:var(--text);border-color:var(--accent)}
+.drawer-body{padding:16px 24px 24px}
+
+/* STAGES */
+.pipeline{display:flex;flex-direction:column;gap:10px}
+.stage{background:var(--s2);border:1px solid var(--border);border-radius:11px;overflow:hidden;transition:all .2s}
+.stage.active{border-color:rgba(108,99,255,.4)}
+.stage.done-safe{border-color:rgba(34,197,94,.3)}
+.stage.done-warn{border-color:rgba(245,158,11,.3)}
+.stage.done-fail{border-color:rgba(239,68,68,.3)}
+.stage.locked{opacity:.4}
+
+.stg-hdr{padding:12px 16px;display:flex;align-items:center;gap:10px}
+.stg-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;background:var(--s3);color:var(--muted);transition:all .2s}
+.stage.active .stg-num{background:var(--accent);color:#fff}
+.stage.done-safe .stg-num{background:var(--green);color:#000}
+.stage.done-warn .stg-num{background:var(--yellow);color:#000}
+.stage.done-fail .stg-num{background:var(--red);color:#fff}
+.stg-title{font-size:13px;font-weight:600;flex:1}
+.stg-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.stg-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:5px}
+.b-run{background:rgba(108,99,255,.15);color:var(--accent);animation:pulse 1.4s infinite}
+.b-safe{background:rgba(34,197,94,.12);color:var(--green)}
+.b-warn{background:rgba(245,158,11,.12);color:var(--yellow)}
+.b-fail{background:rgba(239,68,68,.12);color:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+.stg-body{padding:0 16px 12px;display:none}
+.stage.active .stg-body,.stage.done-safe .stg-body,.stage.done-warn .stg-body,.stage.done-fail .stg-body{display:block}
+
+.prog{height:3px;background:var(--s3);border-radius:2px;margin-bottom:10px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--cyan));border-radius:2px;transition:width .4s ease;width:0}
+
+/* Info grid */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.info-chip{background:var(--s3);border-radius:7px;padding:7px 10px}
+.info-chip .lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}
+.info-chip .val{font-size:12px;font-weight:500}
+
+/* Check rows */
+.chk-list{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.chk{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;background:var(--s3);border-radius:7px;font-size:11px}
+.chk-ico{flex-shrink:0;margin-top:1px}
+.chk-lbl{font-weight:500}
+.chk.ok .chk-lbl{color:var(--green)}
+.chk.warn .chk-lbl{color:var(--yellow)}
+.chk.fail .chk-lbl{color:var(--red)}
+.chk-det{font-size:10px;color:var(--muted);margin-top:1px}
+
+/* Security grid */
+.sec-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px}
+.sec-item{background:var(--s3);border-radius:7px;padding:6px 9px;display:flex;align-items:center;gap:7px;font-size:10px}
+.sec-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sec-dot.pass{background:var(--green)}
+.sec-dot.fail{background:var(--red)}
+.sec-dot.warn{background:var(--yellow)}
+.sec-dot.skip{background:var(--muted)}
+.sec-name{flex:1}
+.sec-st{font-size:9px;font-weight:600}
+.sec-st.pass{color:var(--green)}
+.sec-st.fail{color:var(--red)}
+.sec-st.warn{color:var(--yellow)}
+
+/* Alert boxes */
+.box-safe{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25);border-radius:7px;padding:10px 12px;font-size:11px;color:var(--green);margin-bottom:10px;line-height:1.5}
+.box-warn{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);border-radius:7px;padding:10px 12px;font-size:11px;color:var(--yellow);margin-bottom:10px;line-height:1.5}
+.box-fail{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);border-radius:7px;padding:10px 12px;font-size:11px;color:var(--red);margin-bottom:10px;line-height:1.5}
+
+/* Install box */
+.inst-box{background:var(--s3);border:1px solid rgba(34,197,94,.25);border-radius:9px;padding:14px}
+.inst-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
+.inst-cmd{font-family:monospace;font-size:12px;color:var(--cyan);word-break:break-all;margin-bottom:10px;line-height:1.6}
+.inst-btns{display:flex;gap:7px}
+
+/* Search results in drawer */
+.search-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.sr-item{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .12s;display:flex;align-items:center;gap:10px}
+.sr-item:hover{border-color:rgba(108,99,255,.4)}
+.sr-name{font-size:12px;font-weight:600;flex:1}
+.sr-desc{font-size:10px;color:var(--muted);margin-top:1px}
+.sr-stars{font-size:10px;color:var(--muted);flex-shrink:0}
+
+/* Spinner */
+.spin{display:inline-block;width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle;margin-right:5px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s1);border:1px solid var(--cyan);color:var(--cyan);padding:9px 14px;border-radius:9px;font-size:12px;z-index:999;opacity:0;transform:translateY(6px);transition:all .2s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">🧩</div>
+  <div><div class="topbar-title">Skill Hub</div><div class="topbar-sub">Explorador · Analizador · Instalador</div></div>
+  <div class="spacer"></div>
+  <span class="stat">Instaladas <b id="st-inst">0</b></span>
+  <span class="stat">MCPs <b id="st-mcp">0</b></span>
+  <span class="stat">Disponibles <b id="st-avail">0</b></span>
+</div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-label">Vista</div>
+    <div class="sb-item active" onclick="setView('all',this)"><div class="sb-dot" style="background:var(--accent)"></div>Todo<span class="sb-n" id="n-all">0</span></div>
+    <div class="sb-item" onclick="setView('installed',this)"><div class="sb-dot" style="background:var(--cyan)"></div>Instaladas<span class="sb-n" id="n-inst">0</span></div>
+    <div class="sb-item" onclick="setView('available',this)"><div class="sb-dot" style="background:var(--muted)"></div>Disponibles<span class="sb-n" id="n-avail">0</span></div>
+    <div class="sb-div"></div>
+    <div class="sb-label">Entorno</div>
+    <div class="sb-item" onclick="setEnv('cowork',this)"><div class="sb-dot" style="background:#f59e0b"></div>🖥️ Cowork<span class="sb-n" id="n-cowork">0</span></div>
+    <div class="sb-item" onclick="setEnv('terminal',this)"><div class="sb-dot" style="background:#22c55e"></div>⬛ Terminal<span class="sb-n" id="n-terminal">0</span></div>
+    <div class="sb-item" onclick="setEnv('vscode',this)"><div class="sb-dot" style="background:#8b5cf6"></div>🔷 VS Code<span class="sb-n" id="n-vscode">0</span></div>
+    <div class="sb-item" onclick="setEnv('chat',this)"><div class="sb-dot" style="background:#3b82f6"></div>💬 Chat<span class="sb-n" id="n-chat">0</span></div>
+    <div class="sb-div"></div>
+    <div class="sb-label">MCPs</div>
+    <div class="sb-item" onclick="setEnv('mcp',this)"><div class="sb-dot" style="background:var(--pink)"></div>🔌 Todos<span class="sb-n" id="n-mcp">0</span></div>
+    <div class="sb-item" onclick="setCat('comunicacion',this)"><div class="sb-dot" style="background:var(--pink)"></div>📨 Comunicación</div>
+    <div class="sb-item" onclick="setCat('almacenamiento',this)"><div class="sb-dot" style="background:var(--pink)"></div>📁 Almacenamiento</div>
+    <div class="sb-item" onclick="setCat('productividad',this)"><div class="sb-dot" style="background:var(--pink)"></div>⚡ Productividad</div>
+    <div class="sb-div"></div>
+    <div class="sb-label">Categoría</div>
+    <div class="sb-item" onclick="setCat('marketing',this)">📣 Marketing</div>
+    <div class="sb-item" onclick="setCat('documentos',this)">📄 Documentos</div>
+    <div class="sb-item" onclick="setCat('legal',this)">⚖️ Legal</div>
+    <div class="sb-item" onclick="setCat('codigo',this)">💻 Código</div>
+    <div class="sb-item" onclick="setCat('automatizacion',this)">🤖 Automatización</div>
+    <div class="sb-item" onclick="setCat('investigacion',this)">🔍 Investigación</div>
+    <div class="sb-item" onclick="setCat('datos',this)">📊 Datos</div>
+    <div class="sb-item" onclick="setCat('diseño',this)">🎨 Diseño / UX</div>
+    <div class="sb-item" onclick="setCat('ventas',this)">💰 Ventas</div>
+    <div class="sb-item" onclick="setCat('soporte',this)">🎧 Soporte</div>
+    <div class="sb-item" onclick="setCat('finanzas',this)">🏦 Finanzas</div>
+    <div class="sb-item" onclick="setCat('operaciones',this)">⚙️ Operaciones</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- SEARCH ZONE -->
+    <div class="search-zone">
+      <div id="serverBanner" style="display:none;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:9px 14px;font-size:11px;color:var(--yellow);margin-bottom:10px;line-height:1.6">
+        ⚠️ <strong>Estás abriendo el archivo directamente.</strong> Las búsquedas en GitHub pueden fallar.<br>
+        Para que todo funcione: abre un terminal y ejecuta <code style="background:var(--s3);padding:1px 5px;border-radius:4px">python skill-server.py</code> → luego abre <a href="http://localhost:5757" style="color:var(--cyan)">http://localhost:5757</a>
+      </div>
+      <div class="row">
+        <input class="sbox" id="searchInput" placeholder="🔍  Buscar en tu biblioteca..." oninput="doSearch()" />
+        <button class="btn btn-ghost" onclick="resetAll()">✕</button>
+      </div>
+      <div class="ai-bar">
+        <div class="ai-icon">✨</div>
+        <textarea id="aiInput" placeholder="Describe qué necesitas o pega una URL de GitHub para analizar e instalar... ej: 'quiero hacer páginas web'  ·  https://github.com/user/repo" rows="2"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="aiFind()">🔍 Buscar</button>
+          <button class="btn btn-online" onclick="openAnalyzer()">🔬 Analizar / Instalar</button>
+        </div>
+      </div>
+      <div class="ai-resp" id="aiResp"></div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+      <div class="sec-bar"><div class="sec-title">Skills <span class="sec-count" id="skillCount">0</span></div></div>
+      <div class="grid" id="skillsGrid"></div>
+      <div class="empty-state" id="skillsEmpty" style="display:none"><div style="font-size:32px">🔎</div><p>Sin resultados. Usa 🔬 Analizar para buscar en internet.</p></div>
+
+      <div class="sec-bar" style="margin-top:8px"><div class="sec-title">MCPs / Conectores <span class="sec-count" id="mcpCount">0</span></div></div>
+      <div class="grid" id="mcpGrid"></div>
+      <div class="empty-state" id="mcpEmpty" style="display:none"><div style="font-size:32px">🔌</div><p>Sin MCPs que coincidan.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- MCP INFO DRAWER -->
+<div class="drawer-overlay" id="mcpOverlay" onclick="closeMcpDrawer()"></div>
+<div class="drawer" id="mcpDrawer">
+  <div class="drawer-hdr">
+    <div class="logo" style="width:26px;height:26px;font-size:13px">🔌</div>
+    <h2 id="mcpDrawerTitle">Instalar MCP</h2>
+    <div class="drawer-close" onclick="closeMcpDrawer()">✕</div>
+  </div>
+  <div class="drawer-body" id="mcpDrawerBody"></div>
+</div>
+
+<!-- ANALYZER DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-hdr">
+    <div class="logo" style="width:26px;height:26px;font-size:13px">🔬</div>
+    <h2 id="drawerTitle">Analizar e Instalar</h2>
+    <div class="drawer-close" onclick="closeDrawer()">✕</div>
+  </div>
+  <div class="drawer-body">
+    <!-- Search in drawer -->
+    <div id="drawerSearch" style="margin-bottom:14px">
+      <div class="row" style="margin-bottom:0">
+        <input class="sbox" id="drawerInput" placeholder="URL de GitHub o nombre de skill para buscar online..." />
+        <button class="btn btn-primary" onclick="drawerAnalyze()">Analizar →</button>
+      </div>
+      <div id="drawerSearchResults" style="margin-top:8px"></div>
+    </div>
+    <!-- Pipeline -->
+    <div class="pipeline" id="pipeline" style="display:none">
+      <div class="stage locked" id="stage1">
+        <div class="stg-hdr"><div class="stg-num">1</div><div><div class="stg-title">Repositorio</div><div class="stg-sub" id="s1sub">Cargando...</div></div><span class="stg-badge" id="s1b"></span></div>
+        <div class="stg-body"><div class="prog"><div class="prog-fill" id="p1"></div></div><div class="info-grid" id="repoInfo"></div><div id="s1msg"></div></div>
+      </div>
+      <div class="stage locked" id="stage2">
+        <div class="stg-hdr"><div class="stg-num">2</div><div><div class="stg-title">Compatibilidad del sistema</div><div class="stg-sub" id="s2sub">Pendiente</div></div><span class="stg-badge" id="s2b"></span></div>
+        <div class="stg-body"><div class="prog"><div class="prog-fill" id="p2"></div></div><div class="chk-list" id="pcChecks"></div><div id="s2msg"></div></div>
+      </div>
+      <div class="stage locked" id="stage3">
+        <div class="stg-hdr"><div class="stg-num">3</div><div><div class="stg-title">Seguridad — 26 puntos</div><div class="stg-sub" id="s3sub">Pendiente</div></div><span class="stg-badge" id="s3b"></span></div>
+        <div class="stg-body"><div class="prog"><div class="prog-fill" id="p3"></div></div><div class="sec-grid" id="secGrid"></div><div id="s3msg"></div></div>
+      </div>
+      <div class="stage locked" id="stage4">
+        <div class="stg-hdr"><div class="stg-num">4</div><div><div class="stg-title">Instalación</div><div class="stg-sub" id="s4sub">Pendiente</div></div><span class="stg-badge" id="s4b"></span></div>
+        <div class="stg-body" id="installBody"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">✓ Copiado</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────
+const SKILLS=[
+  {id:1,name:"Content Creation",cat:"marketing",icon:"📣",bg:"#f59e0b22",desc:"Redacta contenido para LinkedIn, blog, email, landing page, comunicado de prensa.",envs:["cowork"],installed:true,tags:["linkedin","post","contenido","redactar","blog","email"]},
+  {id:2,name:"Campaign Plan",cat:"marketing",icon:"🗓️",bg:"#f59e0b22",desc:"Plan de campaña completo: objetivos, audiencia, mensajes, calendario y métricas.",envs:["cowork"],installed:true,tags:["campaña","plan","marketing","calendario","estrategia"]},
+  {id:3,name:"Brand Voice",cat:"marketing",icon:"🎙️",bg:"#f59e0b22",desc:"Genera guías de voz de marca, aplica el tono a contenido y verifica alineación.",envs:["cowork"],installed:true,tags:["marca","tono","voz","branding","estilo","linkedin"]},
+  {id:4,name:"Competitive Brief",cat:"marketing",icon:"⚔️",bg:"#f59e0b22",desc:"Investiga competidores, compara posicionamiento e identifica oportunidades.",envs:["cowork"],installed:true,tags:["competencia","análisis","mercado","posicionamiento"]},
+  {id:5,name:"SEO Audit",cat:"marketing",icon:"📈",bg:"#f59e0b22",desc:"Auditoría SEO: keywords, análisis on-page, gaps de contenido y competidores.",envs:["cowork"],installed:true,tags:["seo","google","keywords","web"]},
+  {id:6,name:"Email Sequence",cat:"marketing",icon:"📧",bg:"#f59e0b22",desc:"Secuencias de emails: bienvenida, nurturing, reactivación, con lógica de branching.",envs:["cowork"],installed:true,tags:["email","secuencia","drip","nurturing","campaña"]},
+  {id:7,name:"Draft Content",cat:"marketing",icon:"✍️",bg:"#f59e0b22",desc:"Borrador de contenido con formato por canal y recomendaciones SEO.",envs:["cowork"],installed:true,tags:["borrador","contenido","post","artículo","linkedin"]},
+  {id:8,name:"Performance Report",cat:"marketing",icon:"📊",bg:"#f59e0b22",desc:"Informe de rendimiento: métricas clave, tendencias y recomendaciones.",envs:["cowork"],installed:true,tags:["reporte","métricas","rendimiento","kpi"]},
+  {id:9,name:"Brand Review",cat:"marketing",icon:"✅",bg:"#f59e0b22",desc:"Revisa textos contra tu guía de estilo y señala desviaciones con correcciones.",envs:["cowork"],installed:true,tags:["revisión","marca","estilo","coherencia"]},
+  {id:10,name:"Word / DOCX",cat:"documentos",icon:"📝",bg:"#3b82f622",desc:"Crea y edita documentos Word: índices, tablas, encabezados, imágenes.",envs:["cowork"],installed:true,tags:["word","documento","informe","carta","memo"]},
+  {id:11,name:"PDF",cat:"documentos",icon:"📄",bg:"#3b82f622",desc:"Extrae texto de PDFs, crea nuevos, fusiona, divide y rellena formularios.",envs:["cowork"],installed:true,tags:["pdf","extraer","formulario","fusionar"]},
+  {id:12,name:"PowerPoint / PPTX",cat:"documentos",icon:"🎞️",bg:"#3b82f622",desc:"Crea y edita presentaciones PowerPoint: plantillas, notas, diseño de slides.",envs:["cowork"],installed:true,tags:["presentación","powerpoint","diapositivas","deck"]},
+  {id:13,name:"Excel / XLSX",cat:"documentos",icon:"📊",bg:"#3b82f622",desc:"Excel avanzado: fórmulas, formatos, análisis de datos, gráficos, tablas dinámicas.",envs:["cowork"],installed:true,tags:["excel","hoja","datos","tabla","presupuesto"]},
+  {id:14,name:"Legal Suite",cat:"legal",icon:"⚖️",bg:"#ef444422",desc:"Revisa contratos, triage de NDA, evaluación de riesgos y respuestas legales.",envs:["cowork"],installed:true,tags:["contrato","legal","nda","riesgo","acuerdo"]},
+  {id:15,name:"Schedule",cat:"automatizacion",icon:"⏰",bg:"#8b5cf622",desc:"Crea tareas que se ejecutan automáticamente: resúmenes diarios, reportes semanales.",envs:["cowork"],installed:true,tags:["programar","automático","recurrente","tarea"]},
+  {id:16,name:"Product Management",cat:"productividad",icon:"🗺️",bg:"#6c63ff22",desc:"Suite completa: specs, roadmaps, sprints, métricas y stakeholder updates.",envs:["cowork"],installed:true,tags:["producto","roadmap","sprint","spec","stakeholder"]},
+  {id:17,name:"Engineering Suite",cat:"codigo",icon:"⚙️",bg:"#22c55e22",desc:"Code review, arquitectura, debugging, documentación técnica, incidentes, deploy.",envs:["cowork","terminal","vscode"],installed:true,tags:["código","review","debug","arquitectura","deploy"]},
+  {id:18,name:"Skill Vault Manager",cat:"productividad",icon:"🗄️",bg:"#22c55e22",desc:"Gestiona tu biblioteca de skills: añadir, buscar, recomendar y descubrir nuevas.",envs:["terminal"],installed:true,tags:["vault","skills","biblioteca","gestión"]},
+  {id:19,name:"Skill Creator",cat:"productividad",icon:"🛠️",bg:"#6c63ff22",desc:"Crea, modifica y optimiza skills. Incluye evals y benchmarks de rendimiento.",envs:["cowork","terminal"],installed:true,tags:["crear","skill","optimizar","evaluar"]},
+  {id:20,name:"Auto Git Commit",cat:"codigo",icon:"🔀",bg:"#22c55e22",desc:"Genera mensajes de commit automáticamente analizando los cambios del repositorio.",envs:["terminal","vscode"],installed:true,url:"https://github.com/topics/claude-skill",tags:["git","commit","código","automatizar"]},
+  {id:21,name:"Nano Banana",cat:"imaging",icon:"🍌",bg:"#22c55e22",desc:"Generación de imágenes con IA (Gemini 3 Pro): fondo verde, transferencia de estilo, referencias.",envs:["terminal"],installed:true,url:"https://github.com/kingbootoshi/nano-banana-2-skill",tags:["imagen","generar","ai","gemini","foto"]},
+  {id:22,name:"Superpowers",cat:"codigo",icon:"🦸",bg:"#22c55e22",desc:"Plugin masivo de Claude Code: TDD, debugging, architecture, research, testing.",envs:["terminal","vscode"],installed:true,url:"https://github.com/obra/superpowers-skills",tags:["superpowers","plugin","tdd","review","memoria"]},
+  {id:23,name:"Systematic Debugging",cat:"codigo",icon:"🐛",bg:"#22c55e22",desc:"Metodología de 4 fases para depurar código: reproduce → analiza → hipótesis → verifica → corrige.",envs:["terminal","vscode"],installed:true,url:"https://github.com/ChrisWiles/claude-code-showcase",tags:["debug","depurar","error","bug","código"]},
+  {id:24,name:"File Search Skill",cat:"investigacion",icon:"🔎",bg:"#3b82f622",desc:"Búsqueda ultra rápida de código y archivos usando ripgrep, grep y fd.",envs:["terminal","vscode"],installed:true,url:"https://github.com/travisvn/awesome-claude-skills",tags:["buscar","archivo","código","ripgrep","rápido"]},
+  {id:25,name:"Context Optimiser",cat:"productividad",icon:"⚡",bg:"#6c63ff22",desc:"Analiza tu proyecto y optimiza la configuración de Claude Code para minimizar tokens.",envs:["terminal"],installed:true,url:"https://github.com/muratcankoylan/context-fundamentals",tags:["contexto","tokens","optimizar","configuración"]},
+  {id:26,name:"LinkedIn Post Writer",cat:"marketing",icon:"💼",bg:"#f59e0b22",desc:"Redacta posts de LinkedIn con alto engagement para profesionales y asesores.",envs:["chat","terminal"],installed:true,url:"https://github.com/aakashg/pm-claude-skills",tags:["linkedin","post","redactar","profesional","networking"]},
+  {id:27,name:"Research Assistant",cat:"investigacion",icon:"🔬",bg:"#3b82f622",desc:"Investiga temas en profundidad, sintetiza fuentes y genera informes estructurados.",envs:["terminal","chat"],installed:true,url:"https://github.com/obra/superpowers-skills",tags:["investigación","buscar","informe","análisis"]},
+  {id:28,name:"Web Scraper",cat:"investigacion",icon:"🕷️",bg:"#3b82f622",desc:"Extrae datos estructurados de páginas web y los convierte a CSV/JSON/Excel.",envs:["terminal"],installed:true,url:"https://github.com/yfe404/web-scraper",tags:["scraping","web","datos","extraer","csv"]},
+  {id:29,name:"Data & Analytics",cat:"datos",icon:"📊",bg:"#00d4aa22",desc:"SQL, análisis de datos, visualizaciones, dashboards, estadística y validación.",envs:["cowork"],installed:true,tags:["datos","sql","análisis","dashboard","gráfico","estadística","query"]},
+  {id:30,name:"Design & UX",cat:"diseño",icon:"🎨",bg:"#ec489922",desc:"Crítica de diseño, handoff, design system, accesibilidad WCAG, UX copy, user research.",envs:["cowork"],installed:true,tags:["diseño","ux","ui","accesibilidad","componentes","copy","research"]},
+  {id:38,name:"Emil Kowalski Design",cat:"diseño",icon:"✨",bg:"#ec489922",desc:"Filosofía de UI polish: animaciones, easing, micro-interacciones, botones, popovers, tooltips. El detalle invisible que hace software premium.",envs:["terminal","vscode","chat"],installed:true,tags:["diseño","animación","ui","easing","micro-interacción","polish","emil"]},
+  {id:39,name:"UI UX Pro Max",cat:"diseño",icon:"🎯",bg:"#ec489922",desc:"67 estilos, 96 paletas, 57 font pairings, 25 charts, 13 stacks. Plan, build, review, optimize interfaces.",envs:["terminal","vscode","chat"],installed:true,tags:["diseño","ux","ui","paleta","tipografía","estilos","responsive"]},
+  {id:40,name:"Frontend Design",cat:"diseño",icon:"🖥️",bg:"#ec489922",desc:"Interfaces production-grade con alta calidad de diseño. Código creativo que evita estética IA genérica.",envs:["terminal","vscode","chat"],installed:true,tags:["diseño","frontend","html","css","web","componente","creativo"]},
+  {id:41,name:"GSAP Core",cat:"codigo",icon:"🎬",bg:"#22c55e22",desc:"API core de GSAP: gsap.to(), from(), fromTo(), easing, stagger, transforms, matchMedia responsive.",envs:["terminal","vscode"],installed:true,url:"https://github.com/greensock/gsap-skills",tags:["gsap","animación","tween","easing","javascript","transform"]},
+  {id:42,name:"GSAP ScrollTrigger",cat:"codigo",icon:"📜",bg:"#22c55e22",desc:"Animaciones vinculadas al scroll: pinning, scrub, parallax, batch, horizontal scroll.",envs:["terminal","vscode"],installed:true,url:"https://github.com/greensock/gsap-skills",tags:["gsap","scroll","parallax","pin","scrub","scrolltrigger"]},
+  {id:43,name:"GSAP Timeline",cat:"codigo",icon:"⏱️",bg:"#22c55e22",desc:"Secuencias de animación: gsap.timeline(), position parameter, labels, nesting, playback control.",envs:["terminal","vscode"],installed:true,url:"https://github.com/greensock/gsap-skills",tags:["gsap","timeline","secuencia","animación","keyframes"]},
+  {id:44,name:"GSAP Plugins",cat:"codigo",icon:"🔌",bg:"#22c55e22",desc:"SplitText, Flip, Draggable, MorphSVG, DrawSVG, MotionPath, ScrambleText, CustomEase.",envs:["terminal","vscode"],installed:true,url:"https://github.com/greensock/gsap-skills",tags:["gsap","plugin","splittext","flip","draggable","svg","morph"]},
+  {id:45,name:"GSAP Performance",cat:"codigo",icon:"⚡",bg:"#22c55e22",desc:"Optimización 60fps: transforms, will-change, quickTo, batching DOM, cleanup off-screen.",envs:["terminal","vscode"],installed:true,url:"https://github.com/greensock/gsap-skills",tags:["gsap","rendimiento","60fps","optimizar","quickTo","performance"]},
+  {id:46,name:"GSAP Utils",cat:"codigo",icon:"🧰",bg:"#22c55e22",desc:"Utilidades: clamp, mapRange, normalize, interpolate, random, snap, toArray, wrap, pipe.",envs:["terminal","vscode"],installed:true,url:"https://github.com/greensock/gsap-skills",tags:["gsap","utilidades","clamp","snap","random","interpolate"]},
+  {id:47,name:"GSAP React",cat:"codigo",icon:"⚛️",bg:"#22c55e22",desc:"GSAP en React/Next.js: useGSAP hook, refs, gsap.context(), cleanup, SSR.",envs:["terminal","vscode"],installed:true,url:"https://github.com/greensock/gsap-skills",tags:["gsap","react","nextjs","useGSAP","hook","cleanup"]},
+  {id:48,name:"GSAP Frameworks",cat:"codigo",icon:"🏗️",bg:"#22c55e22",desc:"GSAP en Vue, Svelte, Nuxt, SvelteKit: lifecycle, scoping, cleanup on unmount.",envs:["terminal","vscode"],installed:true,url:"https://github.com/greensock/gsap-skills",tags:["gsap","vue","svelte","nuxt","framework","lifecycle"]},
+  {id:31,name:"Sales Suite",cat:"ventas",icon:"💰",bg:"#f59e0b22",desc:"Account research, call prep, outreach, competitive intel, forecast, pipeline review.",envs:["cowork"],installed:true,tags:["ventas","sales","outreach","pipeline","forecast","prospección","llamada"]},
+  {id:32,name:"Customer Support",cat:"soporte",icon:"🎧",bg:"#3b82f622",desc:"Triage de tickets, respuestas a clientes, escalaciones, artículos de knowledge base.",envs:["cowork"],installed:true,tags:["soporte","ticket","cliente","respuesta","escalación","kb"]},
+  {id:33,name:"Finance & Accounting",cat:"finanzas",icon:"🏦",bg:"#22c55e22",desc:"Estados financieros, journal entries, conciliaciones, variaciones, cierre mensual, SOX.",envs:["cowork"],installed:true,tags:["finanzas","contabilidad","balance","p&l","conciliación","sox","cierre"]},
+  {id:34,name:"Operations",cat:"operaciones",icon:"⚙️",bg:"#8b5cf622",desc:"Status reports, documentar procesos/SOP, optimización, runbooks, vendor review, capacidad.",envs:["cowork"],installed:true,tags:["operaciones","proceso","runbook","vendor","capacidad","cambio","riesgo"]},
+  {id:35,name:"Enterprise Search",cat:"productividad",icon:"🔍",bg:"#6c63ff22",desc:"Búsqueda en todas las fuentes conectadas, digest diario/semanal, síntesis de conocimiento.",envs:["cowork"],installed:true,tags:["buscar","search","digest","fuentes","conocimiento","síntesis"]},
+  {id:36,name:"Productivity",cat:"productividad",icon:"📋",bg:"#6c63ff22",desc:"Gestión de tareas, memoria persistente, sincronización y sistema de productividad.",envs:["cowork"],installed:true,tags:["tareas","memoria","productividad","sync","organizar"]},
+  {id:37,name:"Plugin Manager",cat:"automatizacion",icon:"🔧",bg:"#8b5cf622",desc:"Personaliza y crea plugins de Cowork desde cero.",envs:["cowork"],installed:true,tags:["plugin","crear","personalizar","cowork","extensión"]},
+];
+
+const MCPS=[
+  {id:"m1",name:"Gmail",cat:"comunicacion",icon:"📨",bg:"#ec489922",desc:"Lee, busca, redacta y envía emails desde Claude. Gestión completa del buzón.",envs:["mcp"],installed:true,tags:["email","gmail","correo","enviar","inbox"]},
+  {id:"m2",name:"Google Calendar",cat:"comunicacion",icon:"📅",bg:"#ec489922",desc:"Crea, edita y consulta eventos. Gestiona tu agenda y encuentra huecos libres.",envs:["mcp"],installed:true,tags:["calendario","evento","agenda","reunión","horario"]},
+  {id:"m3",name:"Google Drive",cat:"almacenamiento",icon:"📁",bg:"#ec489922",desc:"Busca y accede a documentos de Google Drive directamente desde Claude.",envs:["mcp"],installed:true,tags:["drive","google","archivos","documentos"]},
+  {id:"m4",name:"Notion",cat:"almacenamiento",icon:"📓",bg:"#ec489922",desc:"Lee, crea y actualiza páginas y bases de datos de Notion.",envs:["mcp"],installed:true,tags:["notion","páginas","base de datos","notas","wiki"]},
+  {id:"m5",name:"Supabase",cat:"desarrollo",icon:"🗃️",bg:"#ec489922",desc:"Ejecuta SQL, gestiona tablas, despliega funciones edge y administra proyectos.",envs:["mcp"],installed:true,tags:["supabase","sql","base de datos","backend","api"]},
+  {id:"m6",name:"n8n Workflows",cat:"productividad",icon:"🔄",bg:"#ec489922",desc:"Crea, ejecuta y gestiona flujos de automatización en n8n desde Claude.",envs:["mcp"],installed:true,tags:["automatización","workflow","n8n","flujo","integración"]},
+  {id:"m7",name:"Claude in Chrome",cat:"productividad",icon:"🌐",bg:"#ec489922",desc:"Navega por la web, lee páginas, rellena formularios y automatiza tareas en el navegador.",envs:["mcp"],installed:true,tags:["chrome","web","navegador","scraping","automatizar"]},
+  {id:"m8",name:"Slack",cat:"comunicacion",icon:"💬",bg:"#ec489922",desc:"Envía y lee mensajes de Slack, gestiona canales y notificaciones desde Claude.",envs:["mcp"],installed:false,tags:["slack","mensajes","chat","equipo"],
+    mcpInfo:{pkg:"@modelcontextprotocol/server-slack",key:"SLACK_BOT_TOKEN",keyLabel:"Slack Bot Token",keyUrl:"https://api.slack.com/apps",docs:"https://modelcontextprotocol.io/directory",config:'{\n  "slack": {\n    "command": "npx",\n    "args": ["-y","@modelcontextprotocol/server-slack"],\n    "env": {"SLACK_BOT_TOKEN": "xoxb-tu-token"}\n  }\n}'}},
+  {id:"m9",name:"GitHub",cat:"desarrollo",icon:"🐙",bg:"#ec489922",desc:"Gestiona issues, PRs, código y repositorios de GitHub desde Claude.",envs:["mcp"],installed:false,tags:["github","repositorio","código","issues","git"],
+    mcpInfo:{pkg:"@modelcontextprotocol/server-github",key:"GITHUB_PERSONAL_ACCESS_TOKEN",keyLabel:"GitHub Personal Access Token",keyUrl:"https://github.com/settings/tokens",docs:"https://github.com/modelcontextprotocol/servers/tree/main/src/github",config:'{\n  "github": {\n    "command": "npx",\n    "args": ["-y","@modelcontextprotocol/server-github"],\n    "env": {"GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_tu-token"}\n  }\n}'}},
+  {id:"m10",name:"HubSpot",cat:"comunicacion",icon:"🏷️",bg:"#ec489922",desc:"Accede a contactos, deals y actividad de CRM de HubSpot desde Claude.",envs:["mcp"],installed:false,tags:["hubspot","crm","contactos","ventas","leads"],
+    mcpInfo:{pkg:"@hubspot/mcp-server",key:"HUBSPOT_ACCESS_TOKEN",keyLabel:"HubSpot Private App Token",keyUrl:"https://app.hubspot.com/private-apps",docs:"https://github.com/HubSpot/mcp-server",config:'{\n  "hubspot": {\n    "command": "npx",\n    "args": ["-y","@hubspot/mcp-server"],\n    "env": {"HUBSPOT_ACCESS_TOKEN": "pat-tu-token"}\n  }\n}'}},
+  {id:"m11",name:"Jira",cat:"productividad",icon:"🎯",bg:"#ec489922",desc:"Gestiona tickets, sprints y proyectos de Jira desde Claude.",envs:["mcp"],installed:false,tags:["jira","tickets","sprint","proyecto","agile"],
+    mcpInfo:{pkg:"mcp-server-jira",key:"JIRA_API_TOKEN",keyLabel:"Atlassian API Token",keyUrl:"https://id.atlassian.com/manage-profile/security/api-tokens",docs:"https://modelcontextprotocol.io/directory",config:'{\n  "jira": {\n    "command": "npx",\n    "args": ["-y","mcp-server-jira"],\n    "env": {\n      "JIRA_URL": "https://tu-empresa.atlassian.net",\n      "JIRA_EMAIL": "tu@email.com",\n      "JIRA_API_TOKEN": "tu-token"\n    }\n  }\n}'}},
+  {id:"m12",name:"Stripe",cat:"productividad",icon:"💳",bg:"#ec489922",desc:"Consulta transacciones, clientes y suscripciones de Stripe desde Claude.",envs:["mcp"],installed:false,tags:["stripe","pagos","facturación","suscripciones"],
+    mcpInfo:{pkg:"@stripe/mcp",key:"STRIPE_SECRET_KEY",keyLabel:"Stripe Secret Key (sk_live_...)",keyUrl:"https://dashboard.stripe.com/apikeys",docs:"https://github.com/stripe/agent-toolkit",config:'{\n  "stripe": {\n    "command": "npx",\n    "args": ["-y","@stripe/mcp","--tools=all"],\n    "env": {"STRIPE_SECRET_KEY": "sk_live_tu-key"}\n  }\n}'}},
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────
+let ST={view:'all',env:null,cat:null,q:''};
+const EL={label:{terminal:'Terminal',cowork:'Cowork',chat:'Chat',vscode:'VS Code',mcp:'MCP'},icon:{terminal:'⬛',cowork:'🖥️',chat:'💬',vscode:'🔷',mcp:'🔌'},cls:{terminal:'e-terminal',cowork:'e-cowork',chat:'e-chat',vscode:'e-vscode',mcp:'e-mcp'}};
+
+// ── FILTER & RENDER ───────────────────────────────────────────────────
+function filterSkills(){
+  return SKILLS.filter(s=>{
+    if(ST.view==='installed'&&!s.installed)return false;
+    if(ST.view==='available'&&s.installed)return false;
+    if(ST.env&&!s.envs.includes(ST.env))return false;
+    if(ST.cat&&s.cat!==ST.cat)return false;
+    if(ST.q){const q=ST.q.toLowerCase();if(!s.name.toLowerCase().includes(q)&&!s.desc.toLowerCase().includes(q)&&!s.tags.some(t=>t.includes(q)))return false;}
+    return true;
+  });
+}
+function filterMCPs(){
+  if(ST.env&&ST.env!=='mcp')return[];
+  return MCPS.filter(m=>{
+    if(ST.view==='installed'&&!m.installed)return false;
+    if(ST.view==='available'&&m.installed)return false;
+    if(ST.cat&&m.cat!==ST.cat)return false;
+    if(ST.q){const q=ST.q.toLowerCase();if(!m.name.toLowerCase().includes(q)&&!m.desc.toLowerCase().includes(q)&&!m.tags.some(t=>t.includes(q)))return false;}
+    return true;
+  });
+}
+
+function render(){
+  const skills=filterSkills(), mcps=filterMCPs();
+  document.getElementById('skillCount').textContent=skills.length;
+  document.getElementById('mcpCount').textContent=mcps.length;
+  document.getElementById('skillsEmpty').style.display=skills.length?'none':'block';
+  document.getElementById('mcpEmpty').style.display=mcps.length?'none':'block';
+  document.getElementById('skillsGrid').innerHTML=skills.map(cardHTML).join('');
+  document.getElementById('mcpGrid').innerHTML=mcps.map(mcpHTML).join('');
+  updateCounts();
+}
+
+function cardHTML(s){
+  const envs=s.envs.map(e=>`<span class="env ${EL.cls[e]}">${EL.icon[e]} ${EL.label[e]}</span>`).join('');
+  const action=s.installed
+    ?`<span class="tag-inst">✓ Instalada</span>`
+    :`<button class="btn-install" onclick="openAnalyzerWithUrl('${s.url||''}','${s.name}',event)">＋ Analizar e Instalar</button>`;
+  return`<div class="card ${s.installed?'installed':''}" data-id="${s.id}">
+    <div class="card-top"><div class="card-icon" style="background:${s.bg}">${s.icon}</div><div><div class="card-name">${s.name}</div><div class="card-cat">${cap(s.cat)}</div></div></div>
+    <div class="card-desc">${s.desc}</div>
+    <div class="envs">${envs}</div>
+    <div class="card-foot"><div></div>${action}</div>
+  </div>`;
+}
+// Store MCP info objects by id for safe onclick handling
+const _mcpInfoStore = {};
+function mcpHTML(m){
+  if(m.mcpInfo) _mcpInfoStore[m.id] = m.mcpInfo;
+  const action=m.installed
+    ?`<span class="tag-inst">✓ Activo</span>`
+    :`<button class="btn-install" onclick="openMcpInfo(_mcpInfoStore['${m.id}'],'${m.name.replace(/'/g,"\\'")}',event)">⚙️ Cómo instalar</button>`;
+  return`<div class="card mcp ${m.installed?'installed':''}" data-id="${m.id}">
+    <div class="card-top"><div class="card-icon" style="background:${m.bg}">${m.icon}</div><div><div class="card-name">${m.name}</div><div class="card-cat">MCP · ${cap(m.cat)}</div></div></div>
+    <div class="card-desc">${m.desc}</div>
+    <div class="envs"><span class="env e-mcp">🔌 Conector MCP</span></div>
+    <div class="card-foot"><div></div>${action}</div>
+  </div>`;
+}
+
+function updateCounts(){
+  const si=SKILLS.filter(s=>s.installed).length, sa=SKILLS.filter(s=>!s.installed).length;
+  const mi=MCPS.filter(m=>m.installed).length, ma=MCPS.filter(m=>!m.installed).length;
+  document.getElementById('n-all').textContent=SKILLS.length+MCPS.length;
+  document.getElementById('n-inst').textContent=si+mi;
+  document.getElementById('n-avail').textContent=sa+ma;
+  document.getElementById('n-cowork').textContent=SKILLS.filter(s=>s.envs.includes('cowork')).length;
+  document.getElementById('n-terminal').textContent=SKILLS.filter(s=>s.envs.includes('terminal')).length;
+  document.getElementById('n-vscode').textContent=SKILLS.filter(s=>s.envs.includes('vscode')).length;
+  document.getElementById('n-chat').textContent=SKILLS.filter(s=>s.envs.includes('chat')).length;
+  document.getElementById('n-mcp').textContent=MCPS.length;
+  document.getElementById('st-inst').textContent=si;
+  document.getElementById('st-mcp').textContent=mi;
+  document.getElementById('st-avail').textContent=sa+ma;
+}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+
+// ── FILTERS ───────────────────────────────────────────────────────────
+function setActive(el){document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));el.classList.add('active')}
+function setView(v,el){ST={...ST,view:v,env:null,cat:null};setActive(el);render()}
+function setEnv(e,el){ST={...ST,env:e,view:'all',cat:null};setActive(el);render()}
+function setCat(c,el){ST={...ST,cat:c,env:null,view:'all'};setActive(el);render()}
+function doSearch(){ST.q=document.getElementById('searchInput').value;render()}
+function resetAll(){
+  ST={view:'all',env:null,cat:null,q:''};
+  document.getElementById('searchInput').value='';
+  document.getElementById('aiInput').value='';
+  document.getElementById('aiResp').classList.remove('show');
+  document.querySelectorAll('.card.highlight').forEach(c=>c.classList.remove('highlight'));
+  document.querySelectorAll('.sb-item').forEach((el,i)=>el.classList.toggle('active',i===0));
+  render();
+}
+
+// ── AI LOCAL FIND ─────────────────────────────────────────────────────
+const NEED_MAP=[
+  {keys:["linkedin","post","publicar","red social","networking"],ids:[1,3,7,26]},
+  {keys:["páginas web","diseño web","html","frontend","scraping"],ids:[28,17,"m7"]},
+  {keys:["email","correo","enviar correo"],ids:["m1",6,7]},
+  {keys:["calendario","agenda","reunión","cita"],ids:["m2"]},
+  {keys:["contrato","legal","nda"],ids:[14]},
+  {keys:["presentación","deck","powerpoint"],ids:[12]},
+  {keys:["excel","presupuesto","números"],ids:[13]},
+  {keys:["notion","notas","wiki"],ids:["m4"]},
+  {keys:["código","programar","debug","git"],ids:[17,23,"m9",20]},
+  {keys:["word","informe","documento"],ids:[10]},
+  {keys:["imagen","generar imagen","foto ai"],ids:[21]},
+  {keys:["automatizar","workflow","flujo"],ids:["m6",15]},
+  {keys:["buscar archivo","buscar código","file search"],ids:[24]},
+  {keys:["context","tokens","optimiz"],ids:[25]},
+  {keys:["superpowers","plugin avanzado"],ids:[22]},
+  {keys:["datos","sql","query","dashboard","gráfico","estadística","analytics"],ids:[29]},
+  {keys:["diseño","ux","ui","accesibilidad","componente","copy","figma","interfaz"],ids:[30]},
+  {keys:["venta","sales","pipeline","prospect","outreach","forecast","comercial"],ids:[31]},
+  {keys:["soporte","ticket","cliente","escalación","knowledge base","kb"],ids:[32]},
+  {keys:["finanza","contabil","balance","p&l","concilia","sox","cierre","asiento"],ids:[33]},
+  {keys:["operacion","proceso","runbook","vendor","capacidad","sop","raci"],ids:[34]},
+  {keys:["buscar en todo","todas las fuentes","digest","síntesis","enterprise search"],ids:[35]},
+  {keys:["tarea","productividad","organizar","memoria"],ids:[36]},
+  {keys:["crear plugin","personalizar plugin"],ids:[37]},
+];
+function aiFind(){
+  const q=document.getElementById('aiInput').value.trim().toLowerCase();
+  if(!q)return;
+  let ids=new Set();
+  for(const r of NEED_MAP){if(r.keys.some(k=>q.includes(k)))r.ids.forEach(id=>ids.add(id));}
+  if(!ids.size){
+    const words=q.split(' ').filter(w=>w.length>2);
+    [...SKILLS,...MCPS].forEach(item=>{
+      if(words.some(w=>item.tags.some(t=>t.includes(w))||item.name.toLowerCase().includes(w)))ids.add(item.id);
+    });
+  }
+  const resp=document.getElementById('aiResp');
+  resp.classList.add('show');
+  if(!ids.size){
+    // No local results — automatically search GitHub
+    resp.innerHTML=`<span class="spin"></span> No encontré "<em>${q}</em>" localmente. Buscando en GitHub...`;
+    document.getElementById('drawerTitle').textContent='Buscar e Instalar';
+    document.getElementById('drawerInput').value=q;
+    openDrawer();
+    setTimeout(()=>searchDrawer(q), 300);
+    return;
+  }
+  const names=[...ids].slice(0,4).map(id=>{const item=[...SKILLS,...MCPS].find(x=>x.id===id);return item?`<strong>${item.name}</strong>`:''}).filter(Boolean).join(' · ');
+  resp.innerHTML=`Para "<em>${q}</em>" te recomiendo: ${names}. O <a href="#" onclick="document.getElementById('drawerInput').value=document.getElementById('aiInput').value;openDrawer();searchDrawer(document.getElementById('aiInput').value.toLowerCase());return false;" style="color:var(--cyan)">buscar más en GitHub →</a>`;
+  document.querySelectorAll('.card.highlight').forEach(c=>c.classList.remove('highlight'));
+  [...ids].slice(0,4).forEach(id=>{
+    const card=document.querySelector(`[data-id="${id}"]`);
+    if(card){card.classList.add('highlight');card.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  });
+}
+document.getElementById('aiInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey){
+    e.preventDefault();
+    const v=document.getElementById('aiInput').value.trim();
+    // If it's a GitHub URL, go straight to analyzer
+    if(v.match(/^https?:\/\/github\.com\//i)){openAnalyzer();}
+    else{aiFind();}
+  }
+});
+
+// ── DRAWER ────────────────────────────────────────────────────────────
+function openDrawer(){
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+}
+function closeDrawer(){
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+  resetPipeline();
+}
+function openAnalyzer(){
+  const val=document.getElementById('aiInput').value.trim();
+  document.getElementById('drawerInput').value=val;
+  openDrawer();
+  if(val.match(/^https?:\/\/github\.com\//i)||val) drawerAnalyze();
+}
+function openAnalyzerWithUrl(url,name,evt){
+  if(evt)evt.stopPropagation();
+  document.getElementById('drawerTitle').textContent=`Analizar: ${name}`;
+  document.getElementById('drawerInput').value=url||name;
+  openDrawer();
+  if(url)startAnalysis(url);
+  else drawerAnalyze();
+}
+
+// ── DRAWER ANALYZE ────────────────────────────────────────────────────
+async function drawerAnalyze(){
+  const val=document.getElementById('drawerInput').value.trim();
+  if(!val)return;
+  resetPipeline();
+  const isUrl=val.match(/^https?:\/\/github\.com\/([^/]+)\/([^/\s]+)/i);
+  if(isUrl){
+    await startAnalysis(val);
+  } else {
+    await searchDrawer(val);
+  }
+}
+document.getElementById('drawerInput').addEventListener('keydown',e=>{if(e.key==='Enter')drawerAnalyze();});
+
+async function searchDrawer(q){
+  const el=document.getElementById('drawerSearchResults');
+  el.innerHTML=`<div style="color:var(--muted);font-size:12px;padding:6px"><span class="spin"></span>Buscando "${q}" en GitHub...</div>`;
+
+  // Smart search: detect if it looks like owner/repo or a repo name
+  const slashMatch = q.match(/^([a-z0-9_-]+)\/([a-z0-9_.-]+)$/i);
+  const isMcp = /mcp|server|conector|integra/i.test(q);
+
+  // Strategy: run multiple searches in parallel for best results
+  const searches = [];
+
+  // 1. If looks like owner/repo, try direct repo lookup first
+  if(slashMatch){
+    searches.push(ghFetch(`repos/${slashMatch[1]}/${slashMatch[2]}`).then(async r=>{
+      if(!r.ok) return [];
+      const d=await r.json();
+      return [d];
+    }).catch(()=>[]));
+  }
+
+  // 2. Search exact name (no prefix — finds the actual repo)
+  searches.push(ghFetch(`search/repositories`,`?q=${encodeURIComponent(q)}&sort=stars&per_page=8`).then(async r=>{
+    if(!r.ok) return [];
+    const d=await r.json();
+    return d.items||[];
+  }).catch(()=>[]));
+
+  // 3. Search with "claude skill" context for relevant skills
+  if(!slashMatch){
+    const prefix = isMcp ? 'mcp server' : 'claude skill';
+    searches.push(ghFetch(`search/repositories`,`?q=${encodeURIComponent(prefix+' '+q)}&sort=stars&per_page=5`).then(async r=>{
+      if(!r.ok) return [];
+      const d=await r.json();
+      return d.items||[];
+    }).catch(()=>[]));
+  }
+
+  try{
+    const results = await Promise.all(searches);
+    // Merge and deduplicate by full_name
+    const seen=new Set();
+    const items=[];
+    results.flat().forEach(r=>{
+      const key=r.full_name||`${r.owner?.login}/${r.name}`;
+      if(key && !seen.has(key)){
+        seen.add(key);
+        items.push({
+          full_name: key,
+          html_url: r.html_url||`https://github.com/${key}`,
+          description: r.description||'Sin descripción',
+          stargazers_count: r.stargazers_count||0
+        });
+      }
+    });
+    // Sort: exact name matches first, then by stars
+    items.sort((a,b)=>{
+      const aExact=a.full_name.toLowerCase().includes(q.toLowerCase())?1:0;
+      const bExact=b.full_name.toLowerCase().includes(q.toLowerCase())?1:0;
+      if(aExact!==bExact) return bExact-aExact;
+      return b.stargazers_count-a.stargazers_count;
+    });
+    if(!items.length){el.innerHTML=`<div style="color:var(--muted);font-size:11px;padding:6px">Sin resultados. Prueba en inglés o pega la URL directamente.</div>`;return;}
+    el.innerHTML=`<div class="search-list">${items.slice(0,10).map(r=>`
+      <div class="sr-item" onclick="startAnalysis('${r.html_url}')">
+        <div style="flex:1"><div class="sr-name">${r.full_name}</div><div class="sr-desc">${r.description||'Sin descripción'}</div></div>
+        <div class="sr-stars">⭐ ${r.stargazers_count}</div>
+      </div>`).join('')}</div>`;
+  }catch(e){
+    el.innerHTML=`<div style="color:var(--yellow);font-size:11px;padding:6px">⚠️ Error al buscar. Si tienes la URL del repo, pégala directamente.</div>`;
+  }
+}
+
+// ── MCP INFO DRAWER ──────────────────────────────────────────────────
+function openMcpInfo(info, name, evt){
+  if(evt) evt.stopPropagation();
+  const d = document.getElementById('mcpDrawer');
+  const o = document.getElementById('mcpOverlay');
+  if(!info || !info.pkg){
+    alert('Información de instalación no disponible para este MCP.');
+    return;
+  }
+  document.getElementById('mcpDrawerTitle').textContent = `Instalar MCP: ${name}`;
+  document.getElementById('mcpDrawerBody').innerHTML = `
+    <div class="box-warn" style="margin-bottom:14px">
+      ⚠️ Los MCPs <strong>no se instalan como skills</strong>. Se configuran en Claude Code editando
+      <code style="background:var(--s3);padding:1px 5px;border-radius:3px">~/.claude/settings.json</code>
+    </div>
+
+    <div class="info-grid" style="margin-bottom:12px">
+      <div class="info-chip"><div class="lbl">Paquete npm</div><div class="val" style="font-size:11px">${info.pkg}</div></div>
+      <div class="info-chip"><div class="lbl">Credencial requerida</div><div class="val" style="font-size:11px">${info.keyLabel||'API Key'}</div></div>
+    </div>
+
+    <div style="margin-bottom:10px">
+      <div class="inst-lbl" style="margin-bottom:6px">1. Obtén tu API key</div>
+      <a href="${info.keyUrl||'#'}" target="_blank">
+        <button class="btn btn-ghost" style="width:100%">🔑 Obtener ${info.keyLabel||'API Key'} →</button>
+      </a>
+    </div>
+
+    <div style="margin-bottom:10px">
+      <div class="inst-lbl" style="margin-bottom:6px">2. Añade esto a ~/.claude/settings.json → "mcpServers"</div>
+      <div style="background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:10px;font-family:monospace;font-size:11px;color:var(--cyan);white-space:pre;overflow-x:auto;line-height:1.6">${(info.config||'').replace(/</g,'&lt;')}</div>
+      <button class="btn btn-ghost" style="margin-top:6px;width:100%" onclick="navigator.clipboard.writeText(${JSON.stringify(info.config||'').replace(/'/g,"\\'")});this.textContent='✓ Copiado'">📋 Copiar config JSON</button>
+    </div>
+
+    <div style="margin-bottom:10px">
+      <div class="inst-lbl" style="margin-bottom:6px">3. Reinicia Claude Code</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.6">
+        Después de editar settings.json, cierra y vuelve a abrir Claude Code para que el MCP se active.<br>
+        Verifica con: <code style="background:var(--s3);padding:1px 4px;border-radius:3px">/mcp</code> en el terminal de Claude Code.
+      </div>
+    </div>
+
+    <a href="${info.docs||'https://modelcontextprotocol.io'}" target="_blank">
+      <button class="btn btn-ghost" style="width:100%">📖 Documentación oficial →</button>
+    </a>
+  `;
+  o.classList.add('open');
+  d.classList.add('open');
+}
+function closeMcpDrawer(){
+  document.getElementById('mcpDrawer').classList.remove('open');
+  document.getElementById('mcpOverlay').classList.remove('open');
+}
+
+// ── SERVER DETECTION + PROXY HELPERS ─────────────────────────────────
+const ON_SERVER = window.location.protocol !== 'file:';
+const SRV = ON_SERVER ? '' : 'http://localhost:5757';
+
+async function ghFetch(path, params=''){
+  const url = ON_SERVER
+    ? `/gh/${path}${params}`
+    : `http://localhost:5757/gh/${path}${params}`;
+  try {
+    const r = await fetch(url, {headers:{'Accept':'application/vnd.github.v3+json'}});
+    return r;
+  } catch(e) {
+    // Fallback: try direct GitHub API (may hit CORS/rate limit)
+    return fetch(`https://api.github.com/${path}${params}`, {headers:{'Accept':'application/vnd.github.v3+json'}});
+  }
+}
+async function rawFetch(owner, repo, file){
+  const url = ON_SERVER
+    ? `/raw/${owner}/${repo}/HEAD/${file}`
+    : `http://localhost:5757/raw/${owner}/${repo}/HEAD/${file}`;
+  try {
+    return await fetch(url);
+  } catch(e) {
+    return fetch(`https://raw.githubusercontent.com/${owner}/${repo}/HEAD/${file}`);
+  }
+}
+
+// ── PIPELINE ──────────────────────────────────────────────────────────
+let currentUrl='', currentRepo={};
+
+async function startAnalysis(url){
+  document.getElementById('drawerSearchResults').innerHTML='';
+  document.getElementById('pipeline').style.display='flex';
+  currentUrl=url.trim().replace(/\/+$/,'');
+  const m=url.match(/github\.com\/([^/]+)\/([^/\s?#]+)/);
+  if(!m){document.getElementById('s1msg').innerHTML=`<div class="box-fail">URL no válida.</div>`;return;}
+  currentRepo={owner:m[1],repo:m[2].replace(/\.git$/,'')};
+  await stage1();
+}
+
+async function stage1(){
+  setStage('stage1','active'); setBadge('s1b','run','⏳ Cargando');
+  animP('p1',0,60,700);
+  try{
+    const r=await ghFetch(`repos/${currentRepo.owner}/${currentRepo.repo}`);
+    if(r.status===403||r.status===429){throw new Error('rate_limit');}
+    if(!r.ok)throw new Error('not_found');
+    let d;
+    try { d=await r.json(); } catch(jsonErr) { throw new Error('not_found'); }
+    currentRepo.data=d;
+    animP('p1',60,100,300);
+    document.getElementById('repoInfo').innerHTML=`
+      <div class="info-chip"><div class="lbl">Repositorio</div><div class="val">${d.full_name}</div></div>
+      <div class="info-chip"><div class="lbl">Lenguaje</div><div class="val">${d.language||'Markdown'}</div></div>
+      <div class="info-chip"><div class="lbl">⭐ Estrellas</div><div class="val">${d.stargazers_count.toLocaleString()}${d.archived?' ⚠️ Archivado':''}</div></div>
+      <div class="info-chip"><div class="lbl">Actualizado</div><div class="val">${new Date(d.updated_at).toLocaleDateString('es-ES')}</div></div>`;
+    document.getElementById('s1sub').textContent=d.description||d.full_name;
+    setBadge('s1b','safe','✓ OK'); setStage('stage1','done-safe');
+    await sleep(250); await stage2(d);
+  }catch(e){
+    const msg=e.message==='rate_limit'?'Límite de GitHub alcanzado. Espera 1 minuto.':e.message==='not_found'?'Repositorio no encontrado o privado.':'Error de red.';
+    document.getElementById('s1msg').innerHTML=`<div class="box-fail">⛔ ${msg}</div>`;
+    setBadge('s1b','fail','✗ Error'); setStage('stage1','done-fail');
+  }
+}
+
+async function stage2(repoData){
+  setStage('stage2','active'); setBadge('s2b','run','⏳ Analizando');
+  animP('p2',0,30,400);
+
+  // 1. Fetch repo file tree
+  let files=[], fc={};
+  try{
+    const tr=await ghFetch(`repos/${currentRepo.owner}/${currentRepo.repo}/git/trees/HEAD`,`?recursive=1`);
+    if(tr.ok){const td=await tr.json();files=(td.tree||[]).filter(f=>f.type==='blob').map(f=>f.path);}
+  }catch(e){}
+  animP('p2',30,55,400);
+
+  // 2. Download key files — expanded for deep security scanning
+  // Priority 1: Config & manifest files (prompt injection, preinstall scripts)
+  const configFiles=files.filter(f=>f.match(/package\.json$|SKILL\.md$|README\.md$|CLAUDE\.md$|\.sh$|requirements\.txt$|setup\.py$|Dockerfile$/i)).slice(0,8);
+  // Priority 2: Source code files (malware, backdoors, injection)
+  const codeFiles=files.filter(f=>f.match(/\.(ts|js|py|rb|go|rs|php)$/i) && !f.includes('node_modules') && !f.includes('.min.') && !f.includes('dist/') && !f.includes('build/'))
+    .sort((a,b)=>{
+      // Prioritize suspicious paths: plugin/, src/tools/, bin/, scripts/, hooks/
+      const suspA=/plugin|tool|hook|script|bin|exec|spawn|install|preinstall|server|auth|safe/i.test(a)?0:1;
+      const suspB=/plugin|tool|hook|script|bin|exec|spawn|install|preinstall|server|auth|safe/i.test(b)?0:1;
+      return suspA-suspB;
+    }).slice(0,20);
+  // Priority 3: Hidden config / MCP tool descriptions
+  const mcpFiles=files.filter(f=>f.match(/\.claude|mcp|tool.*desc|manifest/i) && !configFiles.includes(f)).slice(0,5);
+
+  const allKeyFiles=[...new Set([...configFiles,...codeFiles,...mcpFiles])];
+  for(const f of allKeyFiles){
+    try{const r=await rawFetch(currentRepo.owner,currentRepo.repo,f);if(r.ok)fc[f]=await r.text();}catch(e){}
+  }
+  currentRepo.files=files; currentRepo.fc=fc;
+  animP('p2',55,75,300);
+
+  // 3. Check system deps (via server — optional)
+  let sysState={}, serverOnline=false;
+  try{
+    const sr=await fetch('http://localhost:5757/check-deps',{signal:AbortSignal.timeout(2000)});
+    if(sr.ok){sysState=await sr.json(); serverOnline=true;}
+  }catch(e){}
+
+  // Detectar plataforma desde el servidor (o navegador como fallback)
+  const isMac=sysState._platform==='darwin'||navigator.platform?.includes('Mac');
+  const isWin=sysState._platform?.startsWith('win')||navigator.platform?.includes('Win');
+  const platformLabel=isMac?'macOS':isWin?'Windows':'Linux';
+
+  // 4. Detect what the repo NEEDS
+  const lang=(repoData.language||'').toLowerCase();
+  const allText=Object.values(fc).join('\n').toLowerCase();
+  const fnames=files.map(f=>f.toLowerCase());
+  const onlyMd=files.length>0&&files.every(f=>f.match(/\.(md|txt|gitignore|license|json)$/i));
+
+  const needed=[]; // {key, label, pkg, url}
+  if(!onlyMd&&files.length>0){
+    if(fnames.includes('package.json')||lang==='typescript'||lang==='javascript')
+      needed.push({key:'node',label:'Node.js',pkg:isWin?'OpenJS.NodeJS.LTS':'node',url:'https://nodejs.org'});
+    if(lang==='python'||fnames.some(f=>f.endsWith('.py')))
+      needed.push({key:'python',label:'Python',pkg:isWin?'Python.Python.3.13':'python@3.13',url:'https://python.org'});
+    if(fnames.some(f=>f.endsWith('.sh'))||allText.includes('#!/bin/bash')){
+      // En Mac/Linux bash viene incluido — solo Windows necesita Git Bash
+      if(isWin) needed.push({key:'bash',label:'Git Bash',pkg:'Git.Git',url:'https://git-scm.com'});
+    }
+    if(allText.includes('bun '))
+      needed.push({key:'bun',label:'Bun runtime',pkg:isWin?'Oven-sh.Bun':'oven-sh/bun/bun',url:'https://bun.sh'});
+    if(['ripgrep','rg --','rg -'].some(t=>allText.includes(t)))
+      needed.push({key:'ripgrep',label:'ripgrep',pkg:isWin?'BurntSushi.ripgrep.MSVC':'ripgrep',url:'https://github.com/BurntSushi/ripgrep'});
+    if(allText.includes('ffmpeg'))
+      needed.push({key:'ffmpeg',label:'FFmpeg',pkg:isWin?'Gyan.FFmpeg':'ffmpeg',url:'https://ffmpeg.org'});
+    if(allText.includes('imagemagick')||allText.includes('magick '))
+      needed.push({key:'magick',label:'ImageMagick',pkg:isWin?'ImageMagick.ImageMagick':'imagemagick',url:'https://imagemagick.org'});
+  }
+
+  animP('p2',75,90,300);
+  animP('p2',90,100,200);
+
+  // 5. Build UI
+  const checks=[];
+  if(onlyMd||needed.length===0){
+    checks.push({cls:'ok',ico:'✅',label:'Sin dependencias',det:'Solo Markdown. Funciona en cualquier sistema.',key:null});
+  } else {
+    for(const dep of needed){
+      const sys=sysState[dep.key];
+      if(sys?.installed){
+        checks.push({cls:'ok',ico:'✅',label:`${dep.label} — instalado`,det:sys.version||'',key:null});
+      } else if(!serverOnline){
+        // Server offline — can't verify, don't show as missing
+        checks.push({cls:'ok',ico:'ℹ️',label:`${dep.label} — no verificado`,det:'Arranca start-skill-hub.bat para comprobar si está instalado.',key:null});
+      } else {
+        const mgr=isWin?'winget':isMac?'brew':'tu gestor de paquetes';
+        checks.push({cls:'warn',ico:'⚠️',label:`${dep.label} — no encontrado`,det:`¿Instalarlo ahora con ${mgr}?`,key:dep.key,pkg:dep.pkg,url:dep.url});
+      }
+    }
+  }
+
+  document.getElementById('pcChecks').innerHTML=checks.map((c,i)=>`
+    <div class="chk ${c.cls}" id="depchk-${i}">
+      <div class="chk-ico">${c.ico}</div>
+      <div style="flex:1">
+        <div class="chk-lbl">${c.label}</div>
+        <div class="chk-det">${c.det}</div>
+      </div>
+      ${c.key?`<button class="btn btn-install" id="depbtn-${i}" onclick="installDep('${c.key}','${c.pkg||''}',${i})" style="font-size:10px;white-space:nowrap">⬇️ Instalar</button>`:''}
+    </div>`).join('');
+
+  const missing=checks.filter(c=>c.cls==='warn');
+  const fails=checks.filter(c=>c.cls==='fail');
+  if(fails.length){
+    document.getElementById('s2msg').innerHTML=`<div class="box-fail">⛔ No compatible con ${platformLabel}.</div>`;
+    setBadge('s2b','fail','✗ No compatible'); setStage('stage2','done-fail');
+    showInstallBlock('pc'); return;
+  }
+  if(missing.length){
+    document.getElementById('s2msg').innerHTML=`<div class="box-warn">⚠️ Faltan ${missing.length} dependencia(s). Instálalas con el botón para que la skill funcione.</div>`;
+    setBadge('s2b','warn','⚠️ Faltan deps'); setStage('stage2','done-warn');
+  } else {
+    document.getElementById('s2sub').textContent='Todo instalado ✓';
+    setBadge('s2b','safe','✅ Listo'); setStage('stage2','done-safe');
+  }
+  await sleep(250); await stage3(fc, files);
+}
+
+async function installDep(key, pkg, idx){
+  const btn=document.getElementById(`depbtn-${idx}`);
+  const row=document.getElementById(`depchk-${idx}`);
+  if(!btn)return;
+  btn.disabled=true; btn.textContent='⏳ Instalando...';
+  try{
+    const r=await fetch('http://localhost:5757/install-dep',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({dep:key})
+    });
+    const d=await r.json();
+    if(d.success){
+      btn.textContent='✅ Instalado';
+      btn.style.background='rgba(34,197,94,.15)'; btn.style.color='var(--green)';
+      row.className='chk ok';
+      row.querySelector('.chk-ico').textContent='✅';
+      row.querySelector('.chk-lbl').textContent=`${key} — instalado correctamente`;
+      row.querySelector('.chk-det').textContent='Reinicia el terminal para que surta efecto.';
+    } else {
+      btn.textContent='❌ Error'; btn.disabled=false;
+      row.querySelector('.chk-det').textContent=d.error||'Error desconocido';
+    }
+  }catch(e){
+    btn.textContent='❌ Sin servidor'; btn.disabled=false;
+  }
+}
+
+/* __SECURITY_SCANNER_INJECT__ */
+
+// SEC_CHECKS, filterExecutable, EXCLUDE_PATHS are injected by the server above
+// (from lib/security-scanner.js — single source of truth)
+const _SCANNER_MARKER = 'SEC_CHECKS injected';
+void(_SCANNER_MARKER); // prevent "unused" in strict mode
+/* ── CHECKS REMOVED — injected by server ──
+  // ═══════════════════════════════════════════════════════════════════════════
+  {name:'Shell inversa / backdoor',cat:'rce',test:c=>/bash\s+-i\s+>&|nc\s+(-e|-c)\s+\/bin|\/dev\/tcp\/|python\s+-c\s+['"]import\s+socket|socat\s+exec|ncat\s.*-e\s|perl\s+-e\s+['"]use\s+Socket|ruby\s+-rsocket\s+-e|php\s+-r\s+['"].*fsockopen|powershell\s+-e\s+[A-Za-z0-9+\/=]{20,}/i.test(c),lvl:'fail'},
+  {name:'Comandos destructivos',cat:'rce',test:c=>/rm\s+-rf\s+\/(?!\S*node_modules)|del\s+\/f\s+\/s\s+\/q\s+C:\\|format\s+[a-z]:\s*$/im.test(c),lvl:'fail'},
+  {name:'Código ofuscado base64→exec',cat:'rce',test:c=>/base64\s*(-d|--decode).*\|\s*(ba)?sh|atob\s*\([^)]{20,}\).*eval|Buffer\.from\s*\([^)]{20,},\s*['"]base64['"]\).*\b(eval|exec|spawn|Function)\b|echo\s+[A-Za-z0-9+\/=]{40,}\s*\|\s*base64/i.test(c),lvl:'fail'},
+  {name:'Command injection',cat:'rce',test:c=>/exec(Sync)?\s*\(\s*(`[^`]*\$\{|['"][^'"]*['"]\s*\+\s*(req|input|user|arg|param|query))|child_process[^)]*exec\s*\(\s*['"][^'"]*['"]\s*\+\s*(req|input|user|arg)/i.test(c),lvl:'fail'},
+  {name:'Escalada de privilegios',cat:'rce',test:c=>/sudo\s+(rm|chmod\s+777|chown\s+root|passwd|tee\s+\/etc)|runas\s+\/user:admin|chmod\s+[47]777\s+\//i.test(c),lvl:'fail'},
+  {name:'Escritura en sistema',cat:'rce',test:c=>/>\s*\/etc\/(passwd|shadow|sudoers|crontab)|>\s*C:\\Windows\\System32|>\s*~\/\.ssh\/authorized_keys|writeFile(Sync)?\s*\(\s*['"]\/etc\//i.test(c),lvl:'fail'},
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CAT 2 — EXFILTRACIÓN DE DATOS
+  // Basado en: CVE-2025-55284 (DNS exfil), postmark-mcp (BCC), Claude Pirate
+  // ═══════════════════════════════════════════════════════════════════════════
+  {name:'Exfiltración via DNS',cat:'exfil',test:c=>/ping\s+-c\s+1\s+[\$f'"]|nslookup\s+\$|dig\s+\$|\.getaddrinfo\s*\(.*\$\{|dns\.resolve.*\+.*(env|secret|token|key)|subprocess[^)]*ping[^)]*(?:env|secret|token|key)/i.test(c),lvl:'fail'},
+  {name:'Exfiltración curl/wget/fetch',cat:'exfil',test:c=>/curl.*\|\s*(ba)?sh|wget.*\|\s*(ba)?sh|curl\s+(-X\s+POST\s+)?[^\n]*\$\{.*env|fetch\s*\([^)]*\+\s*(process\.env|os\.environ|secret|token|key|password)/i.test(c),lvl:'fail'},
+  {name:'BCC / reenvío oculto',cat:'exfil',test:c=>/bcc\s*[=:]\s*['"][^'"]*@|forward.{0,30}@[a-z]+\.[a-z]{2,}|reply.?to\s*[=:]\s*['"][^'"]+@(?!.*example\.com)/i.test(c),lvl:'fail'},
+  {name:'Lectura .env + envío',cat:'exfil',test:c=>/readFile(Sync)?\s*\(\s*['"].*\.env['"].*\n[\s\S]{0,500}(fetch|axios|request|https?\.request|curl)|open\s*\(\s*['"].*\.env['"]\s*\)[\s\S]{0,500}(requests\.post|urllib|urlopen)/i.test(c),lvl:'fail'},
+  {name:'Webhook a dominio externo',cat:'exfil',test:c=>/fetch\s*\(\s*['"]https?:\/\/(?!localhost|127\.0\.0\.1|github\.com|api\.anthropic|api\.openai|registry\.npmjs)[^\s'"]{10,}['"][\s\S]{0,200}(\.env|secret|token|key|password|credential)/i.test(c),lvl:'warn'},
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CAT 3 — PROMPT INJECTION & TOOL POISONING
+  // Basado en: 36% de skills con PI (arXiv), tool poisoning 84.2% éxito
+  // ═══════════════════════════════════════════════════════════════════════════
+  {name:'Prompt injection oculta',cat:'pi',test:c=>/ignore\s+(all\s+)?(previous|above|prior|earlier|system)\s+(instruction|prompt|rule|context)|disregard\s+(the\s+)?(above|previous|system)|you\s+are\s+now\s+(in|a)\s+(unrestricted|jailbreak|DAN|evil)|override\s+(safety|security|restriction|guardrail)/i.test(c),lvl:'fail'},
+  {name:'Ocultación al usuario',cat:'pi',test:c=>/do\s+not\s+(tell|inform|show|reveal|display|mention)\s+(the\s+)?(user|human|person|operator)|without\s+(the\s+)?(user|human|person)('s)?\s+(know|consent|aware|approval|permission)|hide\s+(this|these|the\s+result)\s+from\s+(the\s+)?(user|human)/i.test(c),lvl:'fail'},
+  {name:'Suplantación de herramienta',cat:'pi',test:c=>/add\s+(me\s+as\s+)?a?\s*(contributor|collaborator|maintainer|admin)|grant\s+(me\s+)?(access|permission|write|admin)|change\s+(the\s+)?(repo|repository)\s+(setting|permission|visibility)/i.test(c),lvl:'fail'},
+  {name:'Auto-aprobación forzada',cat:'pi',test:c=>/auto.?approv|always\s+allow|skip\s+(confirm|approval|verification|auth)|--no-verify|--force\s+--yes|yolo\s+mode|YOLO|dangerouslyDisableSandbox\s*[=:]\s*true/i.test(c),lvl:'fail'},
+  {name:'Instrucción en campo de datos',cat:'pi',test:c=>/"(description|title|name|label|alt|placeholder)":\s*"[^"]{0,50}(ignore|forget|disregard|override|you are now|new instruction)/i.test(c),lvl:'fail'},
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CAT 4 — MALWARE & PERSISTENCIA
+  // Basado en: MedusaLocker via skills, AMOS stealer, ClawHavoc
+  // ═══════════════════════════════════════════════════════════════════════════
+  {name:'Descarga + ejecución remota',cat:'malware',test:c=>/curl\s+(-[sSfLo]+\s+)*https?:\/\/[^\s]+\s*\|\s*(ba)?sh|wget\s+-[qO]+\s*-?\s*https?:\/\/[^\s]+\s*\|\s*(ba)?sh|Invoke-WebRequest.*\|\s*Invoke-Expression|IEX\s*\(\s*\(New-Object.*DownloadString|fetch\s*\([^)]+\)\.then[^;]*eval|import\s*\(\s*['"]https?:\/\/(?!cdn\.jsdelivr|unpkg|esm\.sh|cdnjs)/i.test(c),lvl:'fail'},
+  {name:'Ransomware / cifrado masivo',cat:'malware',test:c=>/xmrig|minerd|cryptonight|stratum\+tcp|\.encrypt\s*\(\s*\)[\s\S]{0,200}\.write|crypto\.(createCipher|randomBytes)[\s\S]{0,300}readdir[\s\S]{0,300}\.encrypted|MedusaLocker|LockBit|BlackCat|RansomNote/i.test(c),lvl:'fail'},
+  {name:'Persistencia oculta',cat:'malware',test:c=>/writeFile(Sync)?\s*\(\s*['"].*\.(bashrc|zshrc|profile|bash_profile|crontab)|crontab\s+-l.*echo.*crontab\s+-|schtasks\s+\/create|reg\s+add\s+.*\\Run|LaunchAgents|LaunchDaemons|\.hive|\.swarm/i.test(c),lvl:'fail'},
+  {name:'Proceso oculto / daemon',cat:'malware',test:c=>/spawn\s*\(.*\{[^}]*detach(ed)?\s*:\s*true|fork\s*\([^)]*\{[^}]*silent\s*:\s*true|nohup\s+.*&\s*disown|start\s+\/b\s+.*\.exe|pm2\s+start.*--no-daemon/i.test(c),lvl:'warn'},
+  {name:'Keylogger / input capture',cat:'malware',test:c=>/on\s*['"]?keydown['"]?\s*.*\.key[\s\S]{0,100}(fetch|send|post|emit|socket)|keyboard\.on_press|pynput\.keyboard|GetAsyncKeyState|SetWindowsHookEx/i.test(c),lvl:'fail'},
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CAT 5 — SUPPLY CHAIN & PACKAGE POISONING
+  // Basado en: postmark-mcp en npm, mcp-remote CVE-2025-6514, preinstall hooks
+  // ═══════════════════════════════════════════════════════════════════════════
+  {name:'Script preinstall/postinstall',cat:'supply',test:c=>/"(pre|post)(install|uninstall|publish)"\s*:\s*"(?!tsc|node|npm run|echo|rimraf|husky)/i.test(c),lvl:'warn'},
+  {name:'Dependencia typosquatting',cat:'supply',test:c=>/"(lodaa+sh|lod[o]sh|requ[i]sts|reqeust|requsets|col[u]rs\.js|colours\.js|crpyto|htpps|axois|expreess|chak?ra|momnet)"/i.test(c),lvl:'fail'},
+  {name:'Open redirect / OAuth hijack',cat:'supply',test:c=>/authorization_endpoint.*\+|redirect_uri.*\+\s*(req|input|user|query)|open\s*\(\s*[^'"]*\+\s*(endpoint|redirect|auth_url|callback)/i.test(c),lvl:'fail'},
+  {name:'Código polimórfico / dinámico',cat:'supply',test:c=>/new\s+Function\s*\(\s*[^)]*\+|eval\s*\(\s*(atob|Buffer\.from|decodeURI|unescape)\s*\(|require\s*\(\s*[^'")]*\+|import\s*\(\s*[^'")]*\+/i.test(c),lvl:'fail'},
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CAT 6 — INYECCIÓN CLÁSICA (SQL, Path Traversal, XSS)
+  // Basado en: CVE-2025-68143/44/45 (mcp-server-git), 82% path traversal
+  // ═══════════════════════════════════════════════════════════════════════════
+  {name:'SQL injection',cat:'inject',test:c=>/`\s*(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|UNION)\b[^`]*\$\{|['"].*\b(SELECT|DROP|DELETE)\b.*['"]\s*\+\s*(req|input|user|param|query)/i.test(c),lvl:'warn'},
+  {name:'Path traversal',cat:'inject',test:c=>/\.\.\/(\.\.\/){2,}|path\.join\s*\([^)]*\.\.['"]\s*,\s*(req|input|user|param|query)|path\.resolve\s*\([^)]*\+\s*(req|input|user)/i.test(c),lvl:'warn'},
+  {name:'XSS / innerHTML sin sanitizar',cat:'inject',test:c=>/innerHTML\s*=\s*['"][^'"]*['"]\s*\+\s*(req|input|user|param|query|location)|innerHTML\s*=\s*[^;]*\+\s*(req|input|user|location)|document\.write\s*\(\s*(location|document\.cookie|window\.name)/i.test(c),lvl:'warn'},
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CAT 7 — OFUSCACIÓN & STEGANOGRAFÍA
+  // Basado en: caracteres invisibles, hex encoding, string concatenation tricks
+  // ═══════════════════════════════════════════════════════════════════════════
+  {name:'Caracteres invisibles / RTL',cat:'obfusc',test:c=>/[\u200b\u200c\u200d\u202e\u2066\u2067\u2068\u2069\u206a-\u206f\ufeff\u00ad]/.test(c),lvl:'fail'},
+  {name:'Hex/unicode escape masivo',cat:'obfusc',test:c=>/(\\x[0-9a-f]{2}){8,}|(\\u[0-9a-f]{4}){6,}|String\.fromCharCode\s*\(\s*(\d+\s*,\s*){6,}/i.test(c),lvl:'warn'},
+  {name:'Strings concatenados sospechosos',cat:'obfusc',test:c=>/['"]ht['"]?\s*\+\s*['"]tp|['"]ev['"]?\s*\+\s*['"]al|['"]sh['"]?\s*\+\s*['"]ell|['"]ba['"]?\s*\+\s*['"]se64|['"]pass['"]?\s*\+\s*['"]word/i.test(c),lvl:'warn'},
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CAT 8 — CREDENCIALES & SECRETOS HARDCODEADOS
+  // (Solo en código ejecutable — excluye docs/README/ejemplos)
+  // ═══════════════════════════════════════════════════════════════════════════
+  {name:'API key hardcodeada',cat:'creds',test:c=>/(sk-[a-zA-Z0-9_-]{20,}|ghp_[a-zA-Z0-9]{36}|glpat-[a-zA-Z0-9]{20}|xox[bpars]-[a-zA-Z0-9-]{10,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{35})/i.test(c),lvl:'fail'},
+  {name:'URLs acortadas',cat:'creds',test:c=>/bit\.ly\/[a-zA-Z0-9]+|tinyurl\.com\/[a-zA-Z0-9]+|t\.co\/[a-zA-Z0-9]+|is\.gd\/[a-zA-Z0-9]+|rb\.gy\/[a-zA-Z0-9]+/i.test(c),lvl:'warn'},
+  {name:'Error silenciado global',cat:'creds',test:c=>/process\.on\s*\(\s*['"]unhandled(Rejection|Exception)['"]\s*,\s*\(\s*\)\s*=>\s*\{\s*\}\s*\)|catch\s*\([^)]*\)\s*\{\s*\/\*\s*silent/i.test(c),lvl:'warn'},
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CAT 9 — MCP SERVER ESPECÍFICOS
+  // Basado en: postmark-mcp, mcp-remote, Supabase MCP trifecta
+  // ═══════════════════════════════════════════════════════════════════════════
+  {name:'MCP tool description manipulation',cat:'mcp',test:c=>/<tool_description>[\s\S]*?(ignore|override|forget|disregard)|"description"\s*:\s*"[^"]*\\n[^"]*ignore/i.test(c),lvl:'fail'},
+  {name:'MCP data exfiltration pattern',cat:'mcp',test:c=>/service_role|supabase.*service.*key|bypass.*rls|rls.*bypass|\.rpc\s*\(\s*['"][^'"]+['"]\s*,\s*\{[\s\S]{0,200}(secret|token|key|password)/i.test(c),lvl:'warn'},
+── END REMOVED CHECKS */
+
+async function stage3(fc, files){
+  setStage('stage3','active'); setBadge('s3b','run','⏳ Escaneando');
+
+  // ── FILTRAR carpetas no ejecutables (vendor, node_modules, tests, docs) ──
+  const cleanFc=filterExecutable(fc);
+  const cleanFiles=Object.keys(cleanFc);
+  const skipped=files.length-cleanFiles.length;
+
+  // Separar código fuente de texto general (SKILL.md, README, etc.)
+  const CODE_EXTS=/\.(ts|js|mjs|cjs|py|sh|ps1|rb|go|rs|php|bash|zsh|fish|cmd|bat)$/i;
+  const INSTRUCTION_EXTS=/\.(md|txt|yaml|yml|json|toml)$/i;
+  const codeFiles=cleanFiles.filter(f=>CODE_EXTS.test(f));
+  const instrFiles=cleanFiles.filter(f=>INSTRUCTION_EXTS.test(f));
+  const codeOnly=codeFiles.map(f=>cleanFc[f]).join('\n');
+  const instrOnly=instrFiles.map(f=>cleanFc[f]).join('\n');
+  const allClean=Object.values(cleanFc).join('\n');
+
+  // Para checks de PI/MCP: escanear TODO el texto (incluye SKILL.md)
+  // Para checks de código: solo archivos ejecutables
+  // Para checks mixtos: código + instrucciones
+  const SCAN_TARGETS={
+    rce: codeOnly,      // Solo código ejecutable
+    exfil: codeOnly,    // Solo código
+    pi: allClean,       // Todo (PI puede estar en cualquier archivo)
+    malware: codeOnly,  // Solo código
+    supply: allClean,   // Todo (package.json, etc.)
+    inject: codeOnly,   // Solo código
+    obfusc: allClean,   // Todo
+    creds: codeOnly,    // Solo código (no docs que mencionan API keys como ejemplo)
+    mcp: allClean,      // Todo
+  };
+
+  // ── Categorías para agrupar visualmente ──
+  const CAT_LABELS={
+    rce:'🔴 Shell & RCE', exfil:'🟠 Exfiltración', pi:'🟣 Prompt Injection',
+    malware:'💀 Malware', supply:'📦 Supply Chain', inject:'💉 Inyección',
+    obfusc:'🔮 Ofuscación', creds:'🔑 Credenciales', mcp:'🔧 MCP Específico'
+  };
+
+  // Render grid agrupado por categoría
+  let gridHtml='';
+  let lastCat='';
+  SEC_CHECKS.forEach((chk,i)=>{
+    if(chk.cat!==lastCat){
+      lastCat=chk.cat;
+      gridHtml+=`<div class="sec-cat-header" style="grid-column:1/-1;font-size:11px;font-weight:700;color:var(--text2);margin-top:${i?10:0}px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.06)">${CAT_LABELS[chk.cat]||chk.cat}</div>`;
+    }
+    gridHtml+=`<div class="sec-item" id="si${i}"><div class="sec-dot skip"></div><div class="sec-name">${chk.name}</div><div class="sec-st">–</div></div>`;
+  });
+  document.getElementById('secGrid').innerHTML=gridHtml;
+
+  let fails=0,warns=0;
+  const failDetails=[];
+  for(let i=0;i<SEC_CHECKS.length;i++){
+    await sleep(60);
+    const chk=SEC_CHECKS[i];
+    const target=SCAN_TARGETS[chk.cat]||allClean;
+    const hit=chk.test(target);
+    if(hit&&chk.lvl==='fail'){fails++; failDetails.push(chk.name);}
+    if(hit&&chk.lvl==='warn')warns++;
+    const el=document.getElementById(`si${i}`);
+    if(!el)continue;
+    const lvl=hit?chk.lvl:'pass';
+    el.querySelector('.sec-dot').className=`sec-dot ${lvl}`;
+    el.querySelector('.sec-st').className=`sec-st ${lvl}`;
+    el.querySelector('.sec-st').textContent=hit?(chk.lvl==='fail'?'✗ PELIGRO':'⚠ REVISAR'):'✓ OK';
+    animP('p3',Math.round((i+1)/SEC_CHECKS.length*100),Math.round((i+1)/SEC_CHECKS.length*100),50);
+  }
+
+  // ── Resultado final ──
+  const totalChecks=SEC_CHECKS.length;
+  let lvl,badge,msg;
+  if(fails>0){
+    lvl='fail'; badge='⛔ DANGEROUS';
+    msg=`<div class="box-fail">⛔ <strong>DANGEROUS</strong> — ${fails} amenaza(s) crítica(s) detectada(s):<br><small style="opacity:.8">${failDetails.join(', ')}</small></div>`;
+  } else if(warns>0){
+    lvl='warn'; badge='⚠️ CAUTION';
+    msg=`<div class="box-warn">⚠️ <strong>CAUTION</strong> — ${warns} advertencia(s). Revisa antes de instalar.</div>`;
+  } else {
+    lvl='safe'; badge='✅ SAFE';
+    msg=`<div class="box-safe">✅ <strong>SAFE</strong> — ${totalChecks} checks pasados en ${cleanFiles.length} archivos.</div>`;
+  }
+  const skipNote=skipped>0?`<div style="font-size:10px;color:var(--text3);margin-top:4px">ℹ️ ${skipped} archivo(s) excluido(s) (vendor/node_modules/tests/docs)</div>`:'';
+  document.getElementById('s3msg').innerHTML=msg+skipNote;
+  document.getElementById('s3sub').textContent=`${totalChecks} checks · ${cleanFiles.length} archivos · ${skipped} excluidos`;
+  setBadge('s3b',lvl==='safe'?'safe':lvl==='warn'?'warn':'fail',badge);
+  setStage('stage3',`done-${lvl==='safe'?'safe':lvl==='warn'?'warn':'fail'}`);
+  currentRepo.secLevel=fails>0?'DANGEROUS':warns>0?'CAUTION':'SAFE';
+  currentRepo.secDetails=failDetails;
+  await sleep(250); await stage4();
+}
+
+async function stage4(){
+  setStage('stage4','active');
+  const sec=currentRepo.secLevel||'SAFE';
+  const skillContent=currentRepo.fc?.['SKILL.md']||currentRepo.fc?.['skill.md']||'';
+
+  // Detect custom install command from package.json
+  let cmd=`claude plugin install ${currentUrl}`;
+  try{
+    const pkgRaw=currentRepo.fc?.['package.json'];
+    if(pkgRaw){
+      const pkg=JSON.parse(pkgRaw);
+      if(pkg.install) cmd=pkg.install.replace('{{platform}}','claude');
+      else if(pkg.scripts?.install) cmd=pkg.scripts.install;
+      else if(pkg.bin) cmd=`npx ${pkg.name||currentRepo.repo} init --ai claude`;
+    }
+  }catch(e){}
+  const repoName=currentRepo.repo||'skill';
+  let body='',badge='';
+
+  const installBtn=(label,color)=>`
+    <button id="installBtn" class="btn" style="font-size:12px;padding:8px 16px;background:${color};color:#fff;font-weight:600" onclick="installDirectly()">
+      ⬇️ ${label}
+    </button>`;
+  // Always show vault-add command as fallback — works without server
+  const vaultCmd=`claude plugin install ${currentUrl}`;
+  // Store cmd for safe copying (avoids quoting issues in onclick)
+  window._installPayload = window._installPayload || {};
+  window._installPayload.cmd = cmd;
+  window._installPayload.vaultCmd = vaultCmd;
+  const copyBtn=`<button class="btn btn-ghost" onclick="copyCmd()">📋 Copiar comando</button>`;
+  const ghBtn=`<a href="${currentUrl}" target="_blank"><button class="btn btn-ghost">Ver en GitHub →</button></a>`;
+
+  if(sec==='DANGEROUS'){
+    const details=(currentRepo.secDetails||[]).map(d=>`<li>${d}</li>`).join('');
+    body=`<div class="box-fail">⛔ <strong>INSTALACIÓN BLOQUEADA</strong> — Amenazas críticas detectadas:
+        <ul style="margin:6px 0 0 16px;font-size:11px;opacity:.9">${details}</ul>
+      </div>
+      <div class="inst-box" style="border-color:rgba(239,68,68,.25);opacity:.5">
+        <div class="inst-lbl" style="color:var(--red)">⛔ Instalación deshabilitada por seguridad</div>
+        <div class="inst-btns">
+          <button class="btn" style="font-size:12px;padding:8px 16px;background:rgba(239,68,68,.3);color:rgba(255,255,255,.4);cursor:not-allowed" disabled>⛔ Bloqueado</button>
+          ${ghBtn}
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:8px">Revisa el código en GitHub. Si crees que es un falso positivo, puedes instalar manualmente con:<br><code style="font-size:10px;color:var(--yellow)">${cmd}</code></div>
+      </div>`;
+    badge='⛔ Bloqueado'; setStage('stage4','done-fail');
+  } else if(sec==='CAUTION'){
+    body=`<div class="box-warn">⚠️ CAUTION — Advertencias presentes. Revisa antes.</div>
+      <div class="inst-box">
+        <div class="inst-lbl">Opción 1 — Instalar automáticamente (requiere servidor activo)</div>
+        <div class="inst-btns" style="margin-bottom:10px">
+          ${installBtn('Instalar directamente','rgba(245,158,11,.8)')}
+          ${ghBtn}
+        </div>
+        <div id="installResult"></div>
+        <div class="inst-lbl" style="margin-top:10px">Opción 2 — Pega este comando en Claude Code terminal</div>
+        <div class="inst-cmd">${vaultCmd}</div>
+        ${copyBtn}
+      </div>`;
+    badge='⚠️ Con advertencias'; setStage('stage4','done-warn');
+  } else {
+    body=`<div class="box-safe">✅ SAFE — Skill verificada. Lista para instalar.</div>
+      <div class="inst-box">
+        <div class="inst-lbl">Opción 1 — Instalar automáticamente (requiere servidor activo)</div>
+        <div class="inst-btns" style="margin-bottom:10px">
+          ${installBtn('Instalar directamente','rgba(34,197,94,.8)')}
+          ${ghBtn}
+        </div>
+        <div id="installResult"></div>
+        <div class="inst-lbl" style="margin-top:10px">Opción 2 — Pega este comando en Claude Code terminal</div>
+        <div class="inst-cmd">${vaultCmd}</div>
+        ${copyBtn}
+      </div>`;
+    badge='✅ Lista'; setStage('stage4','done-safe');
+  }
+  document.getElementById('installBody').innerHTML=body;
+  setBadge('s4b',sec==='SAFE'?'safe':sec==='CAUTION'?'warn':'fail',badge);
+  document.getElementById('s4sub').textContent=sec==='SAFE'?'Verificada y lista':sec==='CAUTION'?'Instala con precaución':'No recomendada';
+  // Store for install
+  window._installPayload={url:currentUrl,name:repoName,content:skillContent};
+}
+
+async function installDirectly(){
+  const btn=document.getElementById('installBtn');
+  const res=document.getElementById('installResult');
+  if(!btn||!res)return;
+  btn.disabled=true; btn.textContent='⏳ Instalando...';
+  const payload=window._installPayload||{url:currentUrl,name:currentRepo.repo,content:''};
+  try{
+    const r=await fetch('http://localhost:5757/install',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    const d=await r.json();
+    if(d.success){
+      btn.textContent='✅ Instalada';
+      btn.style.background='rgba(34,197,94,.9)';
+      res.innerHTML=`<div class="box-safe" style="margin-top:8px">✅ Instalada correctamente en <code style="font-size:10px;background:var(--s3);padding:2px 5px;border-radius:3px">${d.rel||d.path}</code></div>`;
+      // Add to live list and re-render immediately
+      const CAT_MAP={'design-ui':'diseño','web-development':'codigo','code-quality':'codigo','research':'investigacion','productivity':'productividad','marketing':'marketing','automation':'automatizacion','imaging':'imaging'};
+      const existing=new Set(SKILLS.map(s=>s.name.toLowerCase().replace(/\s+/g,'-')));
+      const key=(d.name||'').toLowerCase().replace(/\s+/g,'-');
+      if(!existing.has(key)){
+        SKILLS.push({id:Math.max(...SKILLS.map(s=>s.id))+1,name:d.name||key,cat:CAT_MAP[d.category]||d.category||'productividad',icon:'🔧',bg:'#6c63ff22',desc:payload.url||'Skill instalada',envs:['terminal','vscode'],installed:true,url:payload.url||'',tags:[key,d.category||'']});
+        render();
+      }
+    } else {
+      btn.textContent='❌ Error'; btn.disabled=false;
+      res.innerHTML=`<div class="box-fail" style="margin-top:8px">❌ ${d.error}</div>`;
+    }
+  }catch(e){
+    btn.textContent='⬇️ Instalar directamente'; btn.disabled=false;
+    res.innerHTML=`<div class="box-warn" style="margin-top:8px">
+      ⚠️ Servidor no activo — la instalación automática requiere <strong>start-skill-hub.bat</strong>.<br>
+      <span style="color:var(--muted);font-size:10px">Usa la Opción 2 de abajo: copia el comando y pégalo en el terminal de Claude Code.</span>
+    </div>`;
+  }
+}
+
+function showInstallBlock(reason){
+  setStage('stage3','locked'); setStage('stage4','active');
+  document.getElementById('installBody').innerHTML=`<div class="box-fail">⛔ Detenido — ${reason==='pc'?'No compatible con Windows.':'Falló seguridad.'}</div>`;
+  setBadge('s4b','fail','⛔ Bloqueado'); setStage('stage4','done-fail');
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────
+function setStage(id,cls){document.getElementById(id).className=`stage ${cls}`}
+function setBadge(id,type,text){const el=document.getElementById(id);el.textContent=text;el.className=`stg-badge b-${type}`}
+function animP(id,from,to,dur){const el=document.getElementById(id);el.style.transition='none';el.style.width=from+'%';requestAnimationFrame(()=>{el.style.transition=`width ${dur||400}ms ease`;el.style.width=to+'%';})}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function copyCmd(cmd){
+  // Handle cmd passed from onclick — use stored payload if available
+  const text = (window._installPayload?.cmd) || cmd || '';
+  navigator.clipboard.writeText(text).then(()=>{
+    const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);
+  }).catch(()=>{
+    // Fallback for older browsers
+    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);
+  });
+}
+function resetPipeline(){
+  document.getElementById('pipeline').style.display='none';
+  document.getElementById('drawerSearchResults').innerHTML='';
+  ['stage1','stage2','stage3','stage4'].forEach(id=>setStage(id,'locked'));
+  ['s1b','s2b','s3b','s4b'].forEach(id=>{document.getElementById(id).textContent='';document.getElementById(id).className='stg-badge'});
+  ['repoInfo','pcChecks','secGrid','installBody','s1msg','s2msg','s3msg'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=''});
+  ['p1','p2','p3'].forEach(id=>document.getElementById(id).style.width='0');
+  currentRepo={};currentUrl='';
+}
+
+// Init — merge skills from server (dynamic) with hardcoded list
+const CAT_MAP={'design-ui':'diseño','web-development':'codigo','code-quality':'codigo','research':'investigacion','productivity':'productividad','marketing':'marketing','automation':'automatizacion','imaging':'imaging','documentation':'codigo'};
+const ICON_MAP={'diseño':'🎨','codigo':'💻','investigacion':'🔍','productividad':'⚡','marketing':'📣','automatizacion':'🤖','imaging':'🍌'};
+
+async function syncFromServer(){
+  try{
+    const r=await fetch('http://localhost:5757/list');
+    if(!r.ok) return;
+    const live=await r.json();
+    // Build set of existing skill keys (normalize hardcoded names AND folder names)
+    const existing=new Set();
+    SKILLS.forEach(s=>{
+      existing.add(s.name.toLowerCase().replace(/\s+/g,'-'));
+      if(s.url) existing.add(s.url.split('/').pop().toLowerCase());
+    });
+    let nextId=Math.max(...SKILLS.map(s=>s.id))+1;
+    let added=0;
+    live.forEach(s=>{
+      const key=s.name.toLowerCase().replace(/\s+/g,'-');
+      if(!existing.has(key)){
+        const cat=CAT_MAP[s.category]||s.category||'productividad';
+        SKILLS.push({
+          id:nextId++,
+          name:s.name,
+          cat:cat,
+          icon:ICON_MAP[cat]||'🔧',
+          bg:'#6c63ff22',
+          desc:s.desc||s.source||'Skill instalada localmente',
+          envs:['terminal','vscode'],
+          installed:true,
+          url:s.source||'',
+          tags:[s.name.toLowerCase(),s.category||'',key]
+        });
+        existing.add(key);
+        added++;
+      }
+    });
+    console.log(`[Skill Hub] Server sync: ${live.length} on disk, ${added} new merged`);
+  }catch(e){
+    console.log('[Skill Hub] Server not running, using hardcoded list only');
+  }
+}
+
+syncFromServer().then(()=>render());
+
+// Show server banner if opened from file://
+if(!ON_SERVER){
+  document.getElementById('serverBanner').style.display='block';
+}
+</script>
+</body>
+</html>
