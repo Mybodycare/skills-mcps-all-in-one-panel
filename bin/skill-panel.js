@@ -10,10 +10,8 @@ const PORT = parseInt(process.env.SKILL_PANEL_PORT || '5757', 10);
 const VERSION = require('../package.json').version;
 
 async function main() {
-  // First run setup
-  if (isFirstRun()) {
-    runSetup();
-  }
+  // Always sync: consolidate MCPs, update CLAUDE.md skill table
+  runSetup();
 
   // Start server
   startServer(PORT);
