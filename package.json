@@ -1,6 +1,6 @@
 {
   "name": "skill-panel",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "All-in-one panel to explore, audit and install Claude Code skills & MCP servers",
   "bin": {
     "skill-panel": "./bin/skill-panel.js"

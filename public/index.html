@@ -928,9 +928,11 @@ async function stage1(){
     setBadge('s1b','safe','✓ OK'); setStage('stage1','done-safe');
     await sleep(250); await stage2(d);
   }catch(e){
-    const msg=e.message==='rate_limit'?'Límite de GitHub alcanzado. Espera 1 minuto.':e.message==='not_found'?'Repositorio no encontrado o privado.':'Error de red.';
+    const msg=e.message==='rate_limit'?'Límite de GitHub alcanzado. Espera 1 minuto.':e.message==='not_found'?'Repositorio no encontrado o privado.':'Error de red. Comprueba tu conexión.';
     document.getElementById('s1msg').innerHTML=`<div class="box-fail">⛔ ${msg}</div>`;
     setBadge('s1b','fail','✗ Error'); setStage('stage1','done-fail');
+    // Continue to stage2/3 even if repo metadata fails — scanner can still run on URL
+    await sleep(250); await stage2({});
   }
 }
 
